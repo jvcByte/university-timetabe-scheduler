@@ -1,23 +1,20 @@
 import { requireAdmin } from "@/lib/auth-utils";
-import {
-  getTimetableById,
-  getTimetableFilterOptions,
-} from "@/actions/timetables";
-import { ArrowLeft, Calendar, Edit } from "lucide-react";
+import { getTimetableById } from "@/actions/timetables";
+import { prisma } from "@/lib/db";
+import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TimetableDetailView } from "@/components/timetable-detail-view";
-import { Button } from "@/components/ui/button";
+import { EditableTimetableView } from "@/components/editable-timetable-view";
 
-interface TimetableDetailPageProps {
+interface TimetableEditPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function TimetableDetailPage({
+export default async function TimetableEditPage({
   params,
-}: TimetableDetailPageProps) {
+}: TimetableEditPageProps) {
   await requireAdmin();
 
   const { id } = await params;
@@ -26,14 +23,66 @@ export default async function TimetableDetailPage({
     notFound();
   }
 
-  const [timetable, filterOptions] = await Promise.all([
-    getTimetableById(timetableId),
-    getTimetableFilterOptions(timetableId),
-  ]);
+  const timetable = await getTimetableById(timetableId);
 
   if (!timetable) {
     notFound();
   }
+
+  // Get all rooms and instructors for the edit dialog
+  const [allRooms, allInstructors] = await Promise.all([
+    prisma.room.findMany({
+      select: {
+        id: true,
+        name: true,
+        building: true,
+        capacity: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.instructor.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  // Get filter options from assignments
+  const assignments = timetable.assignments;
+  const roomsMap = new Map();
+  const instructorsMap = new Map();
+  const groupsMap = new Map();
+
+  assignments.forEach((assignment) => {
+    roomsMap.set(assignment.room.id, {
+      id: assignment.room.id,
+      name: assignment.room.name,
+      building: assignment.room.building,
+      capacity: assignment.room.capacity,
+    });
+    instructorsMap.set(assignment.instructor.id, {
+      id: assignment.instructor.id,
+      name: assignment.instructor.name,
+    });
+    groupsMap.set(assignment.group.id, {
+      id: assignment.group.id,
+      name: assignment.group.name,
+    });
+  });
+
+  const filterOptions = {
+    rooms: Array.from(roomsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+    instructors: Array.from(instructorsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+    groups: Array.from(groupsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+  };
 
   const violations = timetable.violations as any[];
 
@@ -41,11 +90,11 @@ export default async function TimetableDetailPage({
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <Link
-          href="/admin/timetables"
+          href={`/admin/timetables/${timetableId}`}
           className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Timetables
+          Back to Timetable
         </Link>
 
         {/* Header */}
@@ -53,31 +102,26 @@ export default async function TimetableDetailPage({
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {timetable.name}
+                Edit Timetable: {timetable.name}
               </h1>
               <p className="text-gray-600 mt-1">
                 {timetable.semester} • {timetable.academicYear}
               </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Drag assignments to reschedule or click to edit details
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href={`/admin/timetables/${timetableId}/edit`}>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Timetable
-                </Button>
-              </Link>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  timetable.status === "PUBLISHED"
-                    ? "bg-green-100 text-green-800"
-                    : timetable.status === "GENERATED"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {timetable.status}
-              </span>
-            </div>
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                timetable.status === "PUBLISHED"
+                  ? "bg-green-100 text-green-800"
+                  : timetable.status === "GENERATED"
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {timetable.status}
+            </span>
           </div>
 
           {/* Metrics */}
@@ -105,20 +149,22 @@ export default async function TimetableDetailPage({
               </div>
             )}
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Created</p>
+              <p className="text-sm text-gray-600">Last Updated</p>
               <p className="text-sm font-medium text-gray-900">
-                {new Date(timetable.createdAt).toLocaleDateString()}
+                {new Date(timetable.updatedAt).toLocaleDateString()}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Timetable Detail View with Filters and Calendar */}
+        {/* Editable Timetable View */}
         {timetable.assignments.length > 0 ? (
-          <TimetableDetailView
+          <EditableTimetableView
             timetableId={timetableId}
             initialAssignments={timetable.assignments}
             filterOptions={filterOptions}
+            allRooms={allRooms}
+            allInstructors={allInstructors}
             violations={violations}
           />
         ) : (

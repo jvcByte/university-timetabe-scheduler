@@ -259,25 +259,25 @@
     - Add clear filters functionality
     - _Requirements: 6.5, 6.6, 6.7_
 
-- [ ] 15. Implement manual timetable editing
-  - [ ] 15.1 Add drag-and-drop functionality
+- [x] 15. Implement manual timetable editing
+  - [x] 15.1 Add drag-and-drop functionality
     - Integrate @dnd-kit/core library
     - Make assignment cards draggable
     - Make time slots droppable
     - Handle drag events and update assignments
     - _Requirements: 6.2_
-  - [ ] 15.2 Implement client-side validation
+  - [x] 15.2 Implement client-side validation
     - Check for conflicts before allowing drop
     - Display conflict warnings
     - Prevent invalid moves
     - _Requirements: 6.3, 6.4_
-  - [ ] 15.3 Create assignment update Server Action
+  - [x] 15.3 Create assignment update Server Action
     - Build `updateAssignment` action
     - Validate changes against hard constraints
     - Update database
     - Revalidate timetable view
     - _Requirements: 6.2, 6.3_
-  - [ ] 15.4 Add assignment detail editing
+  - [x] 15.4 Add assignment detail editing
     - Create modal or drawer for assignment details
     - Allow changing instructor, room, or time
     - Validate changes before saving

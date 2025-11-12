@@ -525,3 +525,294 @@ export async function getTimetableFilterOptions(timetableId: number) {
     ),
   };
 }
+
+/**
+ * Update assignment time and day
+ */
+export interface UpdateAssignmentInput {
+  assignmentId: number;
+  day?: string;
+  startTime?: string;
+  endTime?: string;
+  roomId?: number;
+  instructorId?: number;
+}
+
+export interface ConflictInfo {
+  type: string;
+  message: string;
+}
+
+export interface UpdateAssignmentResult {
+  success: boolean;
+  error?: string;
+  conflicts?: ConflictInfo[];
+}
+
+function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+/**
+ * Validate assignment update against hard constraints
+ */
+async function validateAssignmentUpdate(
+  assignmentId: number,
+  timetableId: number,
+  updates: {
+    day?: string;
+    startTime?: string;
+    endTime?: string;
+    roomId?: number;
+    instructorId?: number;
+  }
+): Promise<ConflictInfo[]> {
+  const conflicts: ConflictInfo[] = [];
+
+  // Get the assignment being updated
+  const assignment = await prisma.assignment.findUnique({
+    where: { id: assignmentId },
+    include: {
+      course: true,
+      room: true,
+      instructor: true,
+      group: true,
+    },
+  });
+
+  if (!assignment) {
+    return [{ type: "not_found", message: "Assignment not found" }];
+  }
+
+  // Determine final values after update
+  const finalDay = (updates.day ?? assignment.day) as any;
+  const finalStartTime = updates.startTime ?? assignment.startTime;
+  const finalEndTime = updates.endTime ?? assignment.endTime;
+  const finalRoomId = updates.roomId ?? assignment.roomId;
+  const finalInstructorId = updates.instructorId ?? assignment.instructorId;
+
+  const startMinutes = timeToMinutes(finalStartTime);
+  const endMinutes = timeToMinutes(finalEndTime);
+
+  // Check for room conflicts
+  const roomConflicts = await prisma.assignment.findMany({
+    where: {
+      id: { not: assignmentId },
+      timetableId,
+      day: finalDay,
+      roomId: finalRoomId,
+      OR: [
+        {
+          AND: [
+            { startTime: { lte: finalStartTime } },
+            { endTime: { gt: finalStartTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { lt: finalEndTime } },
+            { endTime: { gte: finalEndTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { gte: finalStartTime } },
+            { endTime: { lte: finalEndTime } },
+          ],
+        },
+      ],
+    },
+    include: {
+      room: true,
+    },
+  });
+
+  if (roomConflicts.length > 0) {
+    const room = await prisma.room.findUnique({ where: { id: finalRoomId } });
+    conflicts.push({
+      type: "room_conflict",
+      message: `Room ${room?.name || "unknown"} is already booked at this time`,
+    });
+  }
+
+  // Check for instructor conflicts
+  const instructorConflicts = await prisma.assignment.findMany({
+    where: {
+      id: { not: assignmentId },
+      timetableId,
+      day: finalDay,
+      instructorId: finalInstructorId,
+      OR: [
+        {
+          AND: [
+            { startTime: { lte: finalStartTime } },
+            { endTime: { gt: finalStartTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { lt: finalEndTime } },
+            { endTime: { gte: finalEndTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { gte: finalStartTime } },
+            { endTime: { lte: finalEndTime } },
+          ],
+        },
+      ],
+    },
+    include: {
+      instructor: true,
+    },
+  });
+
+  if (instructorConflicts.length > 0) {
+    const instructor = await prisma.instructor.findUnique({
+      where: { id: finalInstructorId },
+    });
+    conflicts.push({
+      type: "instructor_conflict",
+      message: `Instructor ${instructor?.name || "unknown"} is already teaching at this time`,
+    });
+  }
+
+  // Check for student group conflicts
+  const groupConflicts = await prisma.assignment.findMany({
+    where: {
+      id: { not: assignmentId },
+      timetableId,
+      day: finalDay,
+      groupId: assignment.groupId,
+      OR: [
+        {
+          AND: [
+            { startTime: { lte: finalStartTime } },
+            { endTime: { gt: finalStartTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { lt: finalEndTime } },
+            { endTime: { gte: finalEndTime } },
+          ],
+        },
+        {
+          AND: [
+            { startTime: { gte: finalStartTime } },
+            { endTime: { lte: finalEndTime } },
+          ],
+        },
+      ],
+    },
+    include: {
+      group: true,
+    },
+  });
+
+  if (groupConflicts.length > 0) {
+    conflicts.push({
+      type: "group_conflict",
+      message: `Student group ${assignment.group.name} already has a class at this time`,
+    });
+  }
+
+  // Check room capacity if room changed
+  if (updates.roomId && updates.roomId !== assignment.roomId) {
+    const newRoom = await prisma.room.findUnique({
+      where: { id: updates.roomId },
+    });
+
+    if (newRoom && newRoom.capacity < assignment.group.size) {
+      conflicts.push({
+        type: "capacity_conflict",
+        message: `Room ${newRoom.name} capacity (${newRoom.capacity}) is less than group size (${assignment.group.size})`,
+      });
+    }
+
+    // Check room type match
+    if (assignment.course.roomType && newRoom?.type !== assignment.course.roomType) {
+      conflicts.push({
+        type: "room_type_conflict",
+        message: `Course requires ${assignment.course.roomType} but room is ${newRoom?.type}`,
+      });
+    }
+  }
+
+  return conflicts;
+}
+
+export async function updateAssignment(
+  input: UpdateAssignmentInput
+): Promise<UpdateAssignmentResult> {
+  try {
+    const { assignmentId, day, startTime, endTime, roomId, instructorId } = input;
+
+    // Get the assignment to find its timetable
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { course: true },
+    });
+
+    if (!assignment) {
+      return {
+        success: false,
+        error: "Assignment not found",
+      };
+    }
+
+    // Calculate end time if only start time is provided
+    let finalEndTime = endTime;
+    if (startTime && !endTime) {
+      const duration = assignment.course.duration;
+      const startMinutes = timeToMinutes(startTime);
+      const endMinutes = startMinutes + duration;
+      const endHours = Math.floor(endMinutes / 60);
+      const endMins = endMinutes % 60;
+      finalEndTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
+    }
+
+    // Build update object
+    const updates: any = {};
+    if (day) updates.day = day;
+    if (startTime) updates.startTime = startTime;
+    if (finalEndTime) updates.endTime = finalEndTime;
+    if (roomId) updates.roomId = roomId;
+    if (instructorId) updates.instructorId = instructorId;
+
+    // Validate the update
+    const conflicts = await validateAssignmentUpdate(
+      assignmentId,
+      assignment.timetableId,
+      updates
+    );
+
+    if (conflicts.length > 0) {
+      return {
+        success: false,
+        conflicts,
+      };
+    }
+
+    // Perform the update
+    await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: updates,
+    });
+
+    // Revalidate the timetable page
+    revalidatePath(`/admin/timetables/${assignment.timetableId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error: any) {
+    console.error("Failed to update assignment:", error);
+    return {
+      success: false,
+      error: "Failed to update assignment",
+    };
+  }
+}
