@@ -212,14 +212,14 @@
     - Return ValidationResult
     - _Requirements: 5.1, 5.3, 5.4_
 
-- [ ] 13. Implement timetable generation integration
-  - [ ] 13.1 Create solver API client
+- [x] 13. Implement timetable generation integration
+  - [x] 13.1 Create solver API client
     - Build HTTP client for solver service communication
     - Implement API key authentication
     - Add retry logic with exponential backoff
     - Handle connection errors and timeouts
     - _Requirements: 4.1, 10.3, 10.4_
-  - [ ] 13.2 Build generation Server Action
+  - [x] 13.2 Build generation Server Action
     - Create `generateTimetable` Server Action
     - Fetch all required data from database (courses, instructors, rooms, groups, constraints)
     - Format payload for solver service
@@ -227,7 +227,7 @@
     - Parse and store results in database
     - Handle errors and display user feedback
     - _Requirements: 4.1, 4.4, 4.5, 4.6_
-  - [ ] 13.3 Create generation UI
+  - [x] 13.3 Create generation UI
     - Build timetable generation page
     - Add generation form with semester selection
     - Implement progress indicator
