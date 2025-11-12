@@ -161,13 +161,13 @@
     - Add OpenAPI documentation
     - _Requirements: 4.1, 5.1, 10.6_
 
-- [ ] 11. Implement OR-Tools constraint solver
-  - [ ] 11.1 Create solver core logic
+- [x] 11. Implement OR-Tools constraint solver
+  - [x] 11.1 Create solver core logic
     - Parse input payload into internal data structures
     - Create CP-SAT model with decision variables
     - Define time slot grid (days × time periods)
     - _Requirements: 4.2, 4.3, 4.8_
-  - [ ] 11.2 Implement hard constraints
+  - [x] 11.2 Implement hard constraints
     - Add constraint: each course assigned exactly once
     - Add constraint: no room double-booking
     - Add constraint: no instructor double-booking
@@ -177,20 +177,20 @@
     - Add constraint: respect instructor availability
     - Add constraint: assignments within working hours
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
-  - [ ] 11.3 Implement soft constraints with penalties
+  - [x] 11.3 Implement soft constraints with penalties
     - Add penalty for instructor preference violations
     - Add penalty for non-compact student schedules (gaps between classes)
     - Add penalty for unbalanced daily load
     - Add penalty for non-preferred room assignments
     - Set objective function to minimize total weighted penalties
     - _Requirements: 3.6, 3.7, 3.8, 3.9, 4.3_
-  - [ ] 11.4 Implement solution extraction
+  - [x] 11.4 Implement solution extraction
     - Extract assignments from solved model
     - Calculate fitness score
     - Identify soft constraint violations
     - Format response as TimetableResult
     - _Requirements: 4.4, 4.5_
-  - [ ] 11.5 Add solver configuration and timeout handling
+  - [x] 11.5 Add solver configuration and timeout handling
     - Configure CP-SAT solver parameters (time limit, workers)
     - Handle infeasible solutions with detailed conflict reporting
     - Implement timeout handling

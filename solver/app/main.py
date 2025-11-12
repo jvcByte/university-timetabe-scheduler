@@ -163,34 +163,38 @@ async def generate_timetable(
         f"{len(payload.groups)} groups"
     )
     
-    start_time = time.time()
-    
     try:
-        # TODO: Implement solver logic in task 11
-        # For now, return a placeholder response
-        solve_time = time.time() - start_time
+        # Import optimizer
+        from .solver.optimizer import optimize_timetable
         
-        logger.warning("Solver not yet implemented - returning placeholder response")
+        # Run optimization
+        success, assignments, fitness_score, violations, solve_time, message = optimize_timetable(payload)
+        
+        logger.info(
+            f"Optimization completed: success={success}, "
+            f"assignments={len(assignments)}, "
+            f"fitness={fitness_score}, "
+            f"time={solve_time:.2f}s"
+        )
         
         return TimetableResult(
-            success=False,
-            assignments=[],
-            fitness_score=None,
-            violations=[],
+            success=success,
+            assignments=assignments,
+            fitness_score=fitness_score,
+            violations=violations,
             solve_time_seconds=solve_time,
-            message="Solver implementation pending (Task 11)"
+            message=message
         )
         
     except Exception as e:
         logger.error(f"Error during timetable generation: {str(e)}", exc_info=True)
-        solve_time = time.time() - start_time
         
         return TimetableResult(
             success=False,
             assignments=[],
             fitness_score=None,
             violations=[],
-            solve_time_seconds=solve_time,
+            solve_time_seconds=0.0,
             message=f"Generation failed: {str(e)}"
         )
 
