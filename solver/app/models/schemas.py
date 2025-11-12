@@ -100,6 +100,16 @@ class TimetableResult(BaseModel):
     message: str
 
 
+class ValidationPayload(BaseModel):
+    """Timetable validation request payload."""
+    courses: List[CourseInput]
+    instructors: List[InstructorInput]
+    rooms: List[RoomInput]
+    groups: List[StudentGroupInput]
+    constraints: ConstraintConfigInput
+    assignments: List[AssignmentOutput]
+
+
 class ValidationResult(BaseModel):
     """Timetable validation result."""
     is_valid: bool

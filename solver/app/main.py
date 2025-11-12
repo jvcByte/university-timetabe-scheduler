@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 import logging
 import time
 from .config import settings
-from .models.schemas import GenerationPayload, TimetableResult, ValidationResult
+from .models.schemas import GenerationPayload, TimetableResult, ValidationPayload, ValidationResult
 
 # Configure logging
 logging.basicConfig(
@@ -201,32 +201,47 @@ async def generate_timetable(
 
 @app.post("/api/v1/validate", response_model=ValidationResult)
 async def validate_timetable(
-    payload: GenerationPayload,
+    payload: ValidationPayload,
     api_key: str = Depends(verify_api_key)
 ):
     """
     Validate a timetable for constraint violations.
     
     This endpoint checks all hard constraints and returns any conflicts found.
+    It validates existing assignments against the provided courses, instructors,
+    rooms, groups, and constraint configuration.
     
     Args:
-        payload: Timetable data to validate
+        payload: Validation request containing entity data and assignments to validate
         api_key: API key for authentication
         
     Returns:
         ValidationResult with validity status and list of conflicts
     """
-    logger.info("Received validation request")
+    logger.info(
+        f"Received validation request: "
+        f"{len(payload.assignments)} assignments, "
+        f"{len(payload.courses)} courses, "
+        f"{len(payload.instructors)} instructors, "
+        f"{len(payload.rooms)} rooms, "
+        f"{len(payload.groups)} groups"
+    )
     
     try:
-        # TODO: Implement validation logic in task 12
-        # For now, return a placeholder response
+        # Import validator
+        from .solver.validator import validate_timetable as run_validation
         
-        logger.warning("Validator not yet implemented - returning placeholder response")
+        # Run validation
+        is_valid, conflicts = run_validation(payload, payload.assignments)
+        
+        logger.info(
+            f"Validation completed: {'VALID' if is_valid else 'INVALID'} "
+            f"({len(conflicts)} conflicts found)"
+        )
         
         return ValidationResult(
-            is_valid=True,
-            conflicts=[]
+            is_valid=is_valid,
+            conflicts=conflicts
         )
         
     except Exception as e:

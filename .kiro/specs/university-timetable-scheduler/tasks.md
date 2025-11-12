@@ -196,8 +196,8 @@
     - Implement timeout handling
     - _Requirements: 4.7, 4.8_
 
-- [ ] 12. Implement timetable validation service
-  - [ ] 12.1 Create constraint validator
+- [x] 12. Implement timetable validation service
+  - [x] 12.1 Create constraint validator
     - Implement hard constraint checking functions
     - Check for room conflicts
     - Check for instructor conflicts
@@ -205,7 +205,7 @@
     - Check room capacity constraints
     - Check room type constraints
     - _Requirements: 5.2, 5.3, 5.6_
-  - [ ] 12.2 Build validation endpoint logic
+  - [x] 12.2 Build validation endpoint logic
     - Parse validation request
     - Run all constraint checks
     - Collect and format conflicts
