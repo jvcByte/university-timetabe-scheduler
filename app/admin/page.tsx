@@ -38,16 +38,17 @@ export default async function AdminDashboard() {
           </div>
         </Link>
 
-        <div className="bg-white p-6 rounded-lg shadow-md opacity-50">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Rooms</h3>
-            <Building className="h-8 w-8 text-purple-600" />
+        <Link href="/admin/rooms">
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Rooms</h3>
+              <Building className="h-8 w-8 text-purple-600" />
+            </div>
+            <p className="text-sm text-gray-600">
+              Manage classrooms and facilities
+            </p>
           </div>
-          <p className="text-sm text-gray-600">
-            Manage classrooms and facilities
-          </p>
-          <p className="text-xs text-gray-400 mt-2">Coming soon</p>
-        </div>
+        </Link>
 
         <div className="bg-white p-6 rounded-lg shadow-md opacity-50">
           <div className="flex items-center justify-between mb-4">

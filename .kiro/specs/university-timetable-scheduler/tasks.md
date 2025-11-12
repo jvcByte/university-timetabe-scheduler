@@ -79,17 +79,17 @@
     - Add JSON editor for availability time slots
     - _Requirements: 1.2, 1.8_
 
-- [ ] 6. Implement room management module
-  - [ ] 6.1 Create room data access layer
+- [x] 6. Implement room management module
+  - [x] 6.1 Create room data access layer
     - Write Prisma queries for room CRUD operations
     - Implement room listing with filtering by type
     - _Requirements: 1.3, 1.8_
-  - [ ] 6.2 Build room Server Actions
+  - [x] 6.2 Build room Server Actions
     - Create `createRoom` action with validation
     - Create `updateRoom` action
     - Create `deleteRoom` action
     - _Requirements: 1.3, 1.8_
-  - [ ] 6.3 Create room management UI
+  - [x] 6.3 Create room management UI
     - Build room listing page with type filters
     - Create room form with equipment selection
     - Add capacity and type validation
