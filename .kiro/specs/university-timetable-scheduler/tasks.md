@@ -95,18 +95,18 @@
     - Add capacity and type validation
     - _Requirements: 1.3, 1.8_
 
-- [ ] 7. Implement student group management module
-  - [ ] 7.1 Create student group data access layer
+- [x] 7. Implement student group management module
+  - [x] 7.1 Create student group data access layer
     - Write Prisma queries for group CRUD operations
     - Implement group listing with course associations
     - _Requirements: 1.4, 1.8_
-  - [ ] 7.2 Build student group Server Actions
+  - [x] 7.2 Build student group Server Actions
     - Create `createStudentGroup` action
     - Create `updateStudentGroup` action
     - Create `deleteStudentGroup` action
     - Implement course assignment logic
     - _Requirements: 1.4, 1.8_
-  - [ ] 7.3 Create student group management UI
+  - [x] 7.3 Create student group management UI
     - Build group listing page
     - Create group form with course multi-select
     - Display group size and program information

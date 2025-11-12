@@ -131,5 +131,8 @@ export async function searchCourses(query: string, limit = 10) {
     },
     take: limit,
     orderBy: { code: "asc" },
+    include: {
+      department: true,
+    },
   });
 }
