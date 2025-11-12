@@ -235,25 +235,25 @@
     - Show error messages for infeasible solutions
     - _Requirements: 4.1, 4.6, 4.7_
 
-- [ ] 14. Implement timetable viewing module
-  - [ ] 14.1 Create timetable data access layer
+- [x] 14. Implement timetable viewing module
+  - [x] 14.1 Create timetable data access layer
     - Write Prisma queries to fetch timetable with assignments
     - Implement filtering by room, instructor, and group
     - Add pagination for large timetables
     - _Requirements: 6.1, 6.5, 6.6, 6.7_
-  - [ ] 14.2 Build timetable listing page
+  - [x] 14.2 Build timetable listing page
     - Create timetable list view with status indicators
     - Add filters for semester and status
     - Display timetable metadata (fitness score, creation date)
     - _Requirements: 9.5_
-  - [ ] 14.3 Create calendar view component
+  - [x] 14.3 Create calendar view component
     - Build weekly calendar grid component
     - Display assignments as cards with course, instructor, room, group info
     - Implement day and week view modes
     - Add color coding for different courses or groups
     - Highlight conflicts with visual indicators
     - _Requirements: 6.1, 6.8_
-  - [ ] 14.4 Implement filter panel
+  - [x] 14.4 Implement filter panel
     - Create filter UI for room, instructor, and group
     - Update calendar view based on selected filters
     - Add clear filters functionality

@@ -302,17 +302,73 @@ export async function getTimetableById(id: number) {
 }
 
 /**
- * Get all timetables with pagination
+ * Get a timetable by ID with filtered assignments
+ */
+export async function getTimetableByIdWithFilters(
+  id: number,
+  filters?: {
+    roomId?: number;
+    instructorId?: number;
+    groupId?: number;
+  }
+) {
+  const where: any = { timetableId: id };
+
+  if (filters?.roomId) {
+    where.roomId = filters.roomId;
+  }
+  if (filters?.instructorId) {
+    where.instructorId = filters.instructorId;
+  }
+  if (filters?.groupId) {
+    where.groupId = filters.groupId;
+  }
+
+  const [timetable, assignments] = await Promise.all([
+    prisma.timetable.findUnique({
+      where: { id },
+    }),
+    prisma.assignment.findMany({
+      where,
+      include: {
+        course: true,
+        instructor: true,
+        room: true,
+        group: true,
+      },
+      orderBy: [{ day: "asc" }, { startTime: "asc" }],
+    }),
+  ]);
+
+  if (!timetable) {
+    return null;
+  }
+
+  return {
+    ...timetable,
+    assignments,
+  };
+}
+
+/**
+ * Get all timetables with pagination and filtering
  */
 export async function getTimetables(params: {
   page?: number;
   pageSize?: number;
   status?: string;
+  semester?: string;
 }) {
-  const { page = 1, pageSize = 10, status } = params;
+  const { page = 1, pageSize = 10, status, semester } = params;
   const skip = (page - 1) * pageSize;
 
-  const where = status ? { status: status as any } : {};
+  const where: any = {};
+  if (status) {
+    where.status = status as any;
+  }
+  if (semester) {
+    where.semester = semester;
+  }
 
   const [timetables, total] = await Promise.all([
     prisma.timetable.findMany({
@@ -338,6 +394,26 @@ export async function getTimetables(params: {
       totalPages: Math.ceil(total / pageSize),
     },
   };
+}
+
+/**
+ * Get all unique semesters from timetables
+ */
+export async function getTimetableSemesters() {
+  const timetables = await prisma.timetable.findMany({
+    select: {
+      semester: true,
+      academicYear: true,
+    },
+    distinct: ["semester", "academicYear"],
+    orderBy: [{ academicYear: "desc" }, { semester: "desc" }],
+  });
+
+  return timetables.map((t) => ({
+    semester: t.semester,
+    academicYear: t.academicYear,
+    label: `${t.semester} ${t.academicYear}`,
+  }));
 }
 
 /**
@@ -410,4 +486,42 @@ export async function archiveTimetable(id: number) {
       error: "Failed to archive timetable",
     };
   }
+}
+
+/**
+ * Get filter options for a timetable (rooms, instructors, groups used in assignments)
+ */
+export async function getTimetableFilterOptions(timetableId: number) {
+  const assignments = await prisma.assignment.findMany({
+    where: { timetableId },
+    select: {
+      room: { select: { id: true, name: true, building: true } },
+      instructor: { select: { id: true, name: true } },
+      group: { select: { id: true, name: true } },
+    },
+    distinct: ["roomId", "instructorId", "groupId"],
+  });
+
+  // Extract unique values
+  const roomsMap = new Map();
+  const instructorsMap = new Map();
+  const groupsMap = new Map();
+
+  assignments.forEach((assignment) => {
+    roomsMap.set(assignment.room.id, assignment.room);
+    instructorsMap.set(assignment.instructor.id, assignment.instructor);
+    groupsMap.set(assignment.group.id, assignment.group);
+  });
+
+  return {
+    rooms: Array.from(roomsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+    instructors: Array.from(instructorsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+    groups: Array.from(groupsMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ),
+  };
 }
