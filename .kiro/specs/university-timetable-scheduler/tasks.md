@@ -125,16 +125,16 @@
     - Add export Server Actions
     - _Requirements: 1.5_
 
-- [ ] 9. Implement constraint configuration module
-  - [ ] 9.1 Create constraint data access layer
+- [x] 9. Implement constraint configuration module
+  - [x] 9.1 Create constraint data access layer
     - Write Prisma queries for constraint config CRUD
     - Implement default constraint loading
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
-  - [ ] 9.2 Build constraint Server Actions
+  - [x] 9.2 Build constraint Server Actions
     - Create `updateConstraintConfig` action
     - Implement constraint validation logic
     - _Requirements: 3.10_
-  - [ ] 9.3 Create constraint configuration UI
+  - [x] 9.3 Create constraint configuration UI
     - Build constraint editor page with sliders for soft constraint weights
     - Add toggle switches for hard constraints
     - Display constraint descriptions and tooltips

@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Users, Building, Calendar } from "lucide-react";
+import { BookOpen, Users, Building, Calendar, Settings } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
@@ -46,6 +46,30 @@ export default async function AdminDashboard() {
             </div>
             <p className="text-sm text-gray-600">
               Manage classrooms and facilities
+            </p>
+          </div>
+        </Link>
+
+        <Link href="/admin/groups">
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Student Groups</h3>
+              <Users className="h-8 w-8 text-indigo-600" />
+            </div>
+            <p className="text-sm text-gray-600">
+              Manage student groups and programs
+            </p>
+          </div>
+        </Link>
+
+        <Link href="/admin/constraints">
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Constraints</h3>
+              <Settings className="h-8 w-8 text-amber-600" />
+            </div>
+            <p className="text-sm text-gray-600">
+              Configure scheduling constraints
             </p>
           </div>
         </Link>
