@@ -8,26 +8,27 @@ async function main() {
 
   // Create departments
   const departments = [
-    { code: 'CS', name: 'Computer Science', description: 'Study of computation, information, and automation' },
+    { code: 'CSC', name: 'Computer Science', description: 'Study of computation, information, and automation' },
+    { code: 'SEN', name: 'Software Engineering', description: 'Study of systematic process of software development lifecycle.' },
     { code: 'MATH', name: 'Mathematics', description: 'Study of numbers, quantity, structure, space, and change' },
-    { code: 'PHYS', name: 'Physics', description: 'Study of matter, energy, and the fundamental forces of nature' },
+    { code: 'PHY', name: 'Physics', description: 'Study of matter, energy, and the fundamental forces of nature' },
     { code: 'CHEM', name: 'Chemistry', description: 'Study of matter and its properties, composition, and reactions' },
     { code: 'BIO', name: 'Biology', description: 'Study of living organisms and their vital processes' },
     { code: 'ENG', name: 'English', description: 'Study of English language, literature, and composition' },
-    { code: 'HIST', name: 'History', description: 'Study of past events and their impact on society' },
-    { code: 'PSYCH', name: 'Psychology', description: 'Study of mind and behavior' },
-    { code: 'ECON', name: 'Economics', description: 'Study of production, distribution, and consumption of goods and services' },
+    { code: 'HIS', name: 'History', description: 'Study of past events and their impact on society' },
+    { code: 'PSY', name: 'Psychology', description: 'Study of mind and behavior' },
+    { code: 'ECO', name: 'Economics', description: 'Study of production, distribution, and consumption of goods and services' },
     { code: 'BUS', name: 'Business Administration', description: 'Study of business management and operations' },
-    { code: 'EE', name: 'Electrical Engineering', description: 'Study of electricity, electronics, and electromagnetism' },
-    { code: 'ME', name: 'Mechanical Engineering', description: 'Study of mechanics, thermodynamics, and materials science' },
-    { code: 'CE', name: 'Civil Engineering', description: 'Study of design and construction of infrastructure' },
+    { code: 'EENG', name: 'Electrical Engineering', description: 'Study of electricity, electronics, and electromagnetism' },
+    { code: 'MENG', name: 'Mechanical Engineering', description: 'Study of mechanics, thermodynamics, and materials science' },
+    { code: 'CENG', name: 'Civil Engineering', description: 'Study of design and construction of infrastructure' },
     { code: 'ART', name: 'Art', description: 'Study of visual arts, design, and creative expression' },
     { code: 'MUS', name: 'Music', description: 'Study of musical theory, performance, and composition' },
     { code: 'PHIL', name: 'Philosophy', description: 'Study of fundamental questions about existence, knowledge, and ethics' },
     { code: 'SOC', name: 'Sociology', description: 'Study of society, social relationships, and institutions' },
-    { code: 'POLI', name: 'Political Science', description: 'Study of government, politics, and political behavior' },
+    { code: 'POL', name: 'Political Science', description: 'Study of government, politics, and political behavior' },
     { code: 'ANTH', name: 'Anthropology', description: 'Study of human societies, cultures, and their development' },
-    { code: 'GEOG', name: 'Geography', description: 'Study of Earth\'s landscapes, environments, and places' },
+    { code: 'GEO', name: 'Geography', description: 'Study of Earth\'s landscapes, environments, and places' },
   ];
 
   const createdDepartments: Record<string, any> = {};
@@ -78,7 +79,7 @@ async function main() {
       userId: faculty1.id,
       name: 'Dr. John Smith',
       email: 'john.smith@university.edu',
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       teachingLoad: 12,
       availability: {
         MONDAY: ['09:00-12:00', '14:00-17:00'],
@@ -112,7 +113,7 @@ async function main() {
       userId: faculty2.id,
       name: 'Dr. Jane Doe',
       email: 'jane.doe@university.edu',
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       teachingLoad: 15,
       availability: {
         MONDAY: ['10:00-13:00', '14:00-18:00'],
@@ -158,10 +159,10 @@ async function main() {
 
   // Create sample rooms
   const room1 = await prisma.room.upsert({
-    where: { name: 'CS-101' },
+    where: { name: 'CSC-101' },
     update: {},
     create: {
-      name: 'CS-101',
+      name: 'CSC-101',
       building: 'Computer Science Building',
       capacity: 50,
       type: 'LECTURE_HALL',
@@ -170,10 +171,10 @@ async function main() {
   });
 
   const room2 = await prisma.room.upsert({
-    where: { name: 'CS-LAB-1' },
+    where: { name: 'CSC-LAB-1' },
     update: {},
     create: {
-      name: 'CS-LAB-1',
+      name: 'CSC-LAB-1',
       building: 'Computer Science Building',
       capacity: 30,
       type: 'LAB',
@@ -221,40 +222,40 @@ async function main() {
 
   // Create sample courses
   const course1 = await prisma.course.upsert({
-    where: { code: 'CS101' },
+    where: { code: 'CSC101' },
     update: {},
     create: {
-      code: 'CS101',
+      code: 'CSC101',
       title: 'Introduction to Programming',
       duration: 90,
       credits: 3,
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       roomType: 'LECTURE_HALL',
     },
   });
 
   const course2 = await prisma.course.upsert({
-    where: { code: 'CS102' },
+    where: { code: 'CSC102' },
     update: {},
     create: {
-      code: 'CS102',
+      code: 'CSC102',
       title: 'Data Structures and Algorithms',
       duration: 90,
       credits: 4,
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       roomType: 'LECTURE_HALL',
     },
   });
 
   const course3 = await prisma.course.upsert({
-    where: { code: 'CS201' },
+    where: { code: 'CSC201' },
     update: {},
     create: {
-      code: 'CS201',
+      code: 'CSC201',
       title: 'Database Systems',
       duration: 90,
       credits: 3,
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       roomType: 'LECTURE_HALL',
     },
   });
@@ -267,7 +268,7 @@ async function main() {
       title: 'Software Engineering Lab',
       duration: 120,
       credits: 2,
-      departmentId: createdDepartments['CS'].id,
+      departmentId: createdDepartments['CSC'].id,
       roomType: 'LAB',
     },
   });
@@ -302,10 +303,10 @@ async function main() {
 
   // Create student groups
   const group1 = await prisma.studentGroup.upsert({
-    where: { name: 'CS-2024-A' },
+    where: { name: 'CSC-2024-A' },
     update: {},
     create: {
-      name: 'CS-2024-A',
+      name: 'CSC-2024-A',
       program: 'Computer Science',
       year: 1,
       semester: 1,
@@ -314,10 +315,10 @@ async function main() {
   });
 
   const group2 = await prisma.studentGroup.upsert({
-    where: { name: 'CS-2024-B' },
+    where: { name: 'CSC-2024-B' },
     update: {},
     create: {
-      name: 'CS-2024-B',
+      name: 'CSC-2024-B',
       program: 'Computer Science',
       year: 1,
       semester: 1,
@@ -326,10 +327,10 @@ async function main() {
   });
 
   const group3 = await prisma.studentGroup.upsert({
-    where: { name: 'CS-2023-A' },
+    where: { name: 'CSC-2023-A' },
     update: {},
     create: {
-      name: 'CS-2023-A',
+      name: 'CSC-2023-A',
       program: 'Computer Science',
       year: 2,
       semester: 3,
