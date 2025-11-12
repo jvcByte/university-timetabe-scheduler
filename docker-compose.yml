@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - SOLVER_API_URL=http://solver:8000
+      - SOLVER_API_KEY=${SOLVER_API_KEY:-development-solver-api-key-change-in-production}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-development-secret-key-change-in-production}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+    volumes:
+      - sqlite-data:/app/data
+    depends_on:
+      - solver
+    restart: unless-stopped
+
+  solver:
+    build:
+      context: ./solver
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${SOLVER_API_KEY:-development-solver-api-key-change-in-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+
+volumes:
+  sqlite-data:
+    driver: local

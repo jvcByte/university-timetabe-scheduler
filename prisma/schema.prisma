@@ -1,0 +1,214 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  instructor   Instructor?
+  studentGroup StudentGroup?
+}
+
+enum Role {
+  ADMIN
+  FACULTY
+  STUDENT
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  courses     Course[]
+  instructors Instructor[]
+}
+
+model Course {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique
+  title        String
+  duration     Int
+  credits      Int
+  departmentId Int
+  roomType     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  department   Department           @relation(fields: [departmentId], references: [id])
+  instructors  CourseInstructor[]
+  groups       CourseGroup[]
+  assignments  Assignment[]
+  
+  @@index([departmentId])
+}
+
+model Instructor {
+  id           Int      @id @default(autoincrement())
+  userId       String?  @unique
+  name         String
+  email        String   @unique
+  departmentId Int
+  teachingLoad Int
+  availability Json
+  preferences  Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user        User?                @relation(fields: [userId], references: [id])
+  department  Department           @relation(fields: [departmentId], references: [id])
+  courses     CourseInstructor[]
+  assignments Assignment[]
+  
+  @@index([departmentId])
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  building  String
+  capacity  Int
+  type      String
+  equipment Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  assignments Assignment[]
+}
+
+model StudentGroup {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  program   String
+  year      Int
+  semester  Int
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user        User?         @relation(fields: [userId], references: [id])
+  userId      String?       @unique
+  courses     CourseGroup[]
+  assignments Assignment[]
+}
+
+model CourseInstructor {
+  courseId     Int
+  instructorId Int
+  isPrimary    Boolean @default(true)
+  
+  course     Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  instructor Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  
+  @@id([courseId, instructorId])
+}
+
+model CourseGroup {
+  courseId Int
+  groupId  Int
+  
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  group  StudentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@id([courseId, groupId])
+}
+
+model Timetable {
+  id           Int             @id @default(autoincrement())
+  name         String
+  semester     String
+  academicYear String
+  status       TimetableStatus @default(DRAFT)
+  fitnessScore Float?
+  violations   Json?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  publishedAt  DateTime?
+  
+  assignments Assignment[]
+}
+
+enum TimetableStatus {
+  DRAFT
+  GENERATING
+  GENERATED
+  PUBLISHED
+  ARCHIVED
+}
+
+model Assignment {
+  id           Int      @id @default(autoincrement())
+  day          Day
+  startTime    String
+  endTime      String
+  courseId     Int
+  instructorId Int
+  roomId       Int
+  groupId      Int
+  timetableId  Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  instructor Instructor   @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  room       Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  group      StudentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  timetable  Timetable    @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  
+  @@unique([timetableId, day, startTime, roomId])
+  @@unique([timetableId, day, startTime, instructorId])
+  @@unique([timetableId, day, startTime, groupId])
+  @@index([timetableId])
+  @@index([courseId])
+  @@index([instructorId])
+  @@index([roomId])
+  @@index([groupId])
+  @@index([day, startTime])
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model ConstraintConfig {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isDefault Boolean  @default(false)
+  
+  noRoomDoubleBooking       Boolean @default(true)
+  noInstructorDoubleBooking Boolean @default(true)
+  roomCapacityCheck         Boolean @default(true)
+  roomTypeMatch             Boolean @default(true)
+  workingHoursOnly          Boolean @default(true)
+  
+  instructorPreferencesWeight Int @default(5)
+  compactSchedulesWeight      Int @default(7)
+  balancedDailyLoadWeight     Int @default(6)
+  preferredRoomsWeight        Int @default(3)
+  
+  workingHoursStart String @default("08:00")
+  workingHoursEnd   String @default("18:00")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

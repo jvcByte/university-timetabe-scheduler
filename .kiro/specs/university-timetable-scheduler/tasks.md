@@ -1,0 +1,466 @@
+# Implementation Plan
+
+- [x] 1. Initialize project structure and dependencies
+  - Create Next.js 16 project with TypeScript and App Router
+  - Set up Tailwind CSS and shadcn/ui components
+  - Initialize Prisma with SQLite datasource
+  - Create Python FastAPI project structure
+  - Set up Docker and Docker Compose configuration files
+  - Configure environment variables and validation
+  - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
+
+- [x] 2. Implement database schema and migrations
+  - [x] 2.1 Create Prisma schema with all models
+    - Define User, Course, Instructor, Room, StudentGroup models
+    - Define Timetable, Assignment, ConstraintConfig models
+    - Define junction tables (CourseInstructor, CourseGroup)
+    - Add enums for Role, Day, TimetableStatus
+    - Configure indexes for performance optimization
+    - _Requirements: 11.1, 11.2, 11.3, 11.6_
+  - [x] 2.2 Generate and run initial migration
+    - Run `prisma migrate dev` to create database
+    - Generate Prisma Client
+    - _Requirements: 11.1, 11.2_
+  - [x] 2.3 Create database seed script
+    - Write seed data for sample courses, instructors, rooms, and groups
+    - Include sample constraint configuration
+    - Create sample admin user
+    - _Requirements: 11.5_
+
+- [x] 3. Set up authentication and authorization
+  - [x] 3.1 Configure NextAuth.js
+    - Create auth configuration with JWT strategy
+    - Implement credentials provider with bcrypt password hashing
+    - Define session callback with role information
+    - _Requirements: 2.1, 2.2_
+  - [x] 3.2 Create authentication middleware
+    - Implement route protection middleware
+    - Add role-based access control checks
+    - Protect admin, faculty, and student routes
+    - _Requirements: 2.3, 2.4, 2.5, 2.6, 2.7_
+  - [x] 3.3 Build login and registration pages
+    - Create login page with form validation
+    - Implement registration page for new users
+    - Add error handling and user feedback
+    - _Requirements: 2.1_
+
+- [x] 4. Implement course management module
+  - [x] 4.1 Create course data access layer
+    - Write Prisma queries for course CRUD operations
+    - Implement course listing with pagination
+    - Add course search and filtering logic
+    - _Requirements: 1.1, 1.8_
+  - [x] 4.2 Build course Server Actions
+    - Create `createCourse` action with Zod validation
+    - Create `updateCourse` action
+    - Create `deleteCourse` action
+    - Implement error handling and revalidation
+    - _Requirements: 1.1, 1.8_
+  - [x] 4.3 Create course management UI
+    - Build course listing page with data table
+    - Create course form component with validation
+    - Add course detail view
+    - Implement optimistic UI updates
+    - _Requirements: 1.1, 1.8_
+
+- [x] 5. Implement instructor management module
+  - [x] 5.1 Create instructor data access layer
+    - Write Prisma queries for instructor CRUD operations
+    - Implement instructor listing with pagination
+    - _Requirements: 1.2, 1.8_
+  - [x] 5.2 Build instructor Server Actions
+    - Create `createInstructor` action with validation
+    - Create `updateInstructor` action
+    - Create `deleteInstructor` action
+    - _Requirements: 1.2, 1.8_
+  - [x] 5.3 Create instructor management UI
+    - Build instructor listing page
+    - Create instructor form with availability editor
+    - Add JSON editor for availability time slots
+    - _Requirements: 1.2, 1.8_
+
+- [ ] 6. Implement room management module
+  - [ ] 6.1 Create room data access layer
+    - Write Prisma queries for room CRUD operations
+    - Implement room listing with filtering by type
+    - _Requirements: 1.3, 1.8_
+  - [ ] 6.2 Build room Server Actions
+    - Create `createRoom` action with validation
+    - Create `updateRoom` action
+    - Create `deleteRoom` action
+    - _Requirements: 1.3, 1.8_
+  - [ ] 6.3 Create room management UI
+    - Build room listing page with type filters
+    - Create room form with equipment selection
+    - Add capacity and type validation
+    - _Requirements: 1.3, 1.8_
+
+- [ ] 7. Implement student group management module
+  - [ ] 7.1 Create student group data access layer
+    - Write Prisma queries for group CRUD operations
+    - Implement group listing with course associations
+    - _Requirements: 1.4, 1.8_
+  - [ ] 7.2 Build student group Server Actions
+    - Create `createStudentGroup` action
+    - Create `updateStudentGroup` action
+    - Create `deleteStudentGroup` action
+    - Implement course assignment logic
+    - _Requirements: 1.4, 1.8_
+  - [ ] 7.3 Create student group management UI
+    - Build group listing page
+    - Create group form with course multi-select
+    - Display group size and program information
+    - _Requirements: 1.4, 1.8_
+
+- [ ] 8. Implement CSV/Excel import and export
+  - [ ] 8.1 Create import functionality
+    - Implement CSV parser using papaparse
+    - Add Excel parser using xlsx library
+    - Create validation logic for imported data
+    - Build import UI with file upload and preview
+    - _Requirements: 1.5, 1.6, 1.7_
+  - [ ] 8.2 Create export functionality
+    - Implement CSV export for all entity types
+    - Implement Excel export with formatting
+    - Add export Server Actions
+    - _Requirements: 1.5_
+
+- [ ] 9. Implement constraint configuration module
+  - [ ] 9.1 Create constraint data access layer
+    - Write Prisma queries for constraint config CRUD
+    - Implement default constraint loading
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
+  - [ ] 9.2 Build constraint Server Actions
+    - Create `updateConstraintConfig` action
+    - Implement constraint validation logic
+    - _Requirements: 3.10_
+  - [ ] 9.3 Create constraint configuration UI
+    - Build constraint editor page with sliders for soft constraint weights
+    - Add toggle switches for hard constraints
+    - Display constraint descriptions and tooltips
+    - Implement working hours time picker
+    - _Requirements: 3.6, 3.7, 3.8, 3.9_
+
+- [ ] 10. Build Python solver service foundation
+  - [ ] 10.1 Create FastAPI application structure
+    - Initialize FastAPI app with CORS and middleware
+    - Set up Pydantic models for request/response
+    - Create API key authentication dependency
+    - Configure logging and error handlers
+    - _Requirements: 10.1, 10.2, 10.6_
+  - [ ] 10.2 Define Pydantic schemas
+    - Create CourseInput, InstructorInput, RoomInput, StudentGroupInput models
+    - Create ConstraintConfigInput model
+    - Create GenerationPayload model
+    - Create AssignmentOutput, TimetableResult, ValidationResult models
+    - _Requirements: 4.1, 5.1_
+  - [ ] 10.3 Implement API endpoints
+    - Create POST /api/v1/generate endpoint
+    - Create POST /api/v1/validate endpoint
+    - Create GET /api/v1/health endpoint
+    - Add OpenAPI documentation
+    - _Requirements: 4.1, 5.1, 10.6_
+
+- [ ] 11. Implement OR-Tools constraint solver
+  - [ ] 11.1 Create solver core logic
+    - Parse input payload into internal data structures
+    - Create CP-SAT model with decision variables
+    - Define time slot grid (days × time periods)
+    - _Requirements: 4.2, 4.3, 4.8_
+  - [ ] 11.2 Implement hard constraints
+    - Add constraint: each course assigned exactly once
+    - Add constraint: no room double-booking
+    - Add constraint: no instructor double-booking
+    - Add constraint: no student group double-booking
+    - Add constraint: room capacity >= group size
+    - Add constraint: room type matches course requirements
+    - Add constraint: respect instructor availability
+    - Add constraint: assignments within working hours
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
+  - [ ] 11.3 Implement soft constraints with penalties
+    - Add penalty for instructor preference violations
+    - Add penalty for non-compact student schedules (gaps between classes)
+    - Add penalty for unbalanced daily load
+    - Add penalty for non-preferred room assignments
+    - Set objective function to minimize total weighted penalties
+    - _Requirements: 3.6, 3.7, 3.8, 3.9, 4.3_
+  - [ ] 11.4 Implement solution extraction
+    - Extract assignments from solved model
+    - Calculate fitness score
+    - Identify soft constraint violations
+    - Format response as TimetableResult
+    - _Requirements: 4.4, 4.5_
+  - [ ] 11.5 Add solver configuration and timeout handling
+    - Configure CP-SAT solver parameters (time limit, workers)
+    - Handle infeasible solutions with detailed conflict reporting
+    - Implement timeout handling
+    - _Requirements: 4.7, 4.8_
+
+- [ ] 12. Implement timetable validation service
+  - [ ] 12.1 Create constraint validator
+    - Implement hard constraint checking functions
+    - Check for room conflicts
+    - Check for instructor conflicts
+    - Check for group conflicts
+    - Check room capacity constraints
+    - Check room type constraints
+    - _Requirements: 5.2, 5.3, 5.6_
+  - [ ] 12.2 Build validation endpoint logic
+    - Parse validation request
+    - Run all constraint checks
+    - Collect and format conflicts
+    - Return ValidationResult
+    - _Requirements: 5.1, 5.3, 5.4_
+
+- [ ] 13. Implement timetable generation integration
+  - [ ] 13.1 Create solver API client
+    - Build HTTP client for solver service communication
+    - Implement API key authentication
+    - Add retry logic with exponential backoff
+    - Handle connection errors and timeouts
+    - _Requirements: 4.1, 10.3, 10.4_
+  - [ ] 13.2 Build generation Server Action
+    - Create `generateTimetable` Server Action
+    - Fetch all required data from database (courses, instructors, rooms, groups, constraints)
+    - Format payload for solver service
+    - Call solver API
+    - Parse and store results in database
+    - Handle errors and display user feedback
+    - _Requirements: 4.1, 4.4, 4.5, 4.6_
+  - [ ] 13.3 Create generation UI
+    - Build timetable generation page
+    - Add generation form with semester selection
+    - Implement progress indicator
+    - Display generation results (fitness score, violations)
+    - Show error messages for infeasible solutions
+    - _Requirements: 4.1, 4.6, 4.7_
+
+- [ ] 14. Implement timetable viewing module
+  - [ ] 14.1 Create timetable data access layer
+    - Write Prisma queries to fetch timetable with assignments
+    - Implement filtering by room, instructor, and group
+    - Add pagination for large timetables
+    - _Requirements: 6.1, 6.5, 6.6, 6.7_
+  - [ ] 14.2 Build timetable listing page
+    - Create timetable list view with status indicators
+    - Add filters for semester and status
+    - Display timetable metadata (fitness score, creation date)
+    - _Requirements: 9.5_
+  - [ ] 14.3 Create calendar view component
+    - Build weekly calendar grid component
+    - Display assignments as cards with course, instructor, room, group info
+    - Implement day and week view modes
+    - Add color coding for different courses or groups
+    - Highlight conflicts with visual indicators
+    - _Requirements: 6.1, 6.8_
+  - [ ] 14.4 Implement filter panel
+    - Create filter UI for room, instructor, and group
+    - Update calendar view based on selected filters
+    - Add clear filters functionality
+    - _Requirements: 6.5, 6.6, 6.7_
+
+- [ ] 15. Implement manual timetable editing
+  - [ ] 15.1 Add drag-and-drop functionality
+    - Integrate @dnd-kit/core library
+    - Make assignment cards draggable
+    - Make time slots droppable
+    - Handle drag events and update assignments
+    - _Requirements: 6.2_
+  - [ ] 15.2 Implement client-side validation
+    - Check for conflicts before allowing drop
+    - Display conflict warnings
+    - Prevent invalid moves
+    - _Requirements: 6.3, 6.4_
+  - [ ] 15.3 Create assignment update Server Action
+    - Build `updateAssignment` action
+    - Validate changes against hard constraints
+    - Update database
+    - Revalidate timetable view
+    - _Requirements: 6.2, 6.3_
+  - [ ] 15.4 Add assignment detail editing
+    - Create modal or drawer for assignment details
+    - Allow changing instructor, room, or time
+    - Validate changes before saving
+    - _Requirements: 6.2, 6.3_
+
+- [ ] 16. Implement timetable publishing
+  - [ ] 16.1 Create publish Server Action
+    - Build `publishTimetable` action
+    - Update timetable status to PUBLISHED
+    - Set publishedAt timestamp
+    - Revalidate relevant pages
+    - _Requirements: 7.1, 7.2_
+  - [ ] 16.2 Implement role-based timetable access
+    - Filter published timetables for Faculty users (show their schedule)
+    - Filter published timetables for Student users (show their group schedule)
+    - _Requirements: 7.5, 7.6_
+  - [ ] 16.3 Create faculty schedule view
+    - Build page showing instructor's teaching schedule
+    - Display only assignments for logged-in faculty
+    - Add calendar and list views
+    - _Requirements: 7.5_
+  - [ ] 16.4 Create student schedule view
+    - Build page showing student group's class schedule
+    - Display only assignments for student's group
+    - Add calendar and list views
+    - _Requirements: 7.6_
+
+- [ ] 17. Implement export functionality
+  - [ ] 17.1 Create PDF export
+    - Build PDF generation using react-pdf or puppeteer
+    - Create formatted timetable layout
+    - Support filtered exports (by room, instructor, group)
+    - Implement `exportTimetablePDF` Server Action
+    - _Requirements: 7.3, 7.7_
+  - [ ] 17.2 Create Excel export
+    - Build Excel generation using xlsx library
+    - Format timetable data in spreadsheet
+    - Include multiple sheets for different views
+    - Implement `exportTimetableExcel` Server Action
+    - _Requirements: 7.4, 7.7_
+  - [ ] 17.3 Add export UI
+    - Create export button with format selection
+    - Add filter options for export scope
+    - Handle download and error states
+    - _Requirements: 7.3, 7.4_
+
+- [ ] 18. Implement faculty availability management
+  - [ ] 18.1 Create availability editor component
+    - Build weekly time grid UI
+    - Allow marking time slots as available/unavailable
+    - Support setting preferred time slots
+    - Store availability as JSON
+    - _Requirements: 8.1, 8.2, 8.3_
+  - [ ] 18.2 Build availability Server Actions
+    - Create `updateInstructorAvailability` action
+    - Validate availability data
+    - Update instructor record
+    - _Requirements: 8.2, 8.6_
+  - [ ] 18.3 Create faculty availability page
+    - Build page for faculty to manage their availability
+    - Display current availability
+    - Allow updates at any time
+    - _Requirements: 8.1, 8.6_
+  - [ ] 18.4 Integrate availability into solver
+    - Ensure solver respects instructor availability as hard constraints
+    - Use preferences as soft constraints
+    - _Requirements: 8.4, 8.5_
+
+- [ ] 19. Implement dashboard and analytics
+  - [ ] 19.1 Create dashboard data queries
+    - Write queries for entity counts
+    - Calculate room utilization rates
+    - Calculate instructor teaching load distribution
+    - Fetch recent timetables and activity
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
+  - [ ] 19.2 Build admin dashboard
+    - Create dashboard page with stats cards
+    - Display entity counts (courses, instructors, rooms, groups)
+    - Show timetable status overview
+    - Add recent activity feed
+    - _Requirements: 9.1, 9.5, 9.6_
+  - [ ] 19.3 Create analytics charts
+    - Build room utilization chart using Recharts
+    - Create instructor load distribution chart
+    - Display soft constraint violation breakdown
+    - _Requirements: 9.2, 9.3, 9.4_
+  - [ ] 19.4 Implement role-specific dashboards
+    - Create faculty dashboard showing their schedule and stats
+    - Create student dashboard showing their schedule
+    - _Requirements: 9.1_
+
+- [ ] 20. Add validation and error handling
+  - [ ] 20.1 Create Zod validation schemas
+    - Define schemas for all entity inputs
+    - Add custom validation rules
+    - Create reusable validation utilities
+    - _Requirements: 1.7_
+  - [ ] 20.2 Implement comprehensive error handling
+    - Add try-catch blocks to all Server Actions
+    - Return typed error results
+    - Log errors appropriately
+    - Display user-friendly error messages
+    - _Requirements: 4.7, 10.4_
+  - [ ] 20.3 Add form validation
+    - Integrate Zod with React Hook Form
+    - Display field-level errors
+    - Implement real-time validation
+    - _Requirements: 1.7_
+
+- [ ] 21. Implement Docker deployment
+  - [ ] 21.1 Create web application Dockerfile
+    - Write multi-stage Dockerfile for Next.js
+    - Include Prisma generation step
+    - Optimize image size
+    - _Requirements: 12.1, 12.5_
+  - [ ] 21.2 Create solver service Dockerfile
+    - Write Dockerfile for Python FastAPI app
+    - Install OR-Tools and dependencies
+    - Configure uvicorn server
+    - _Requirements: 12.2, 12.6_
+  - [ ] 21.3 Create Docker Compose configuration
+    - Define web and solver services
+    - Configure networking between services
+    - Set up SQLite volume for persistence
+    - Define environment variables
+    - _Requirements: 12.3, 12.4, 12.7_
+  - [ ] 21.4 Add deployment documentation
+    - Write README with setup instructions
+    - Document environment variables
+    - Add troubleshooting guide
+    - _Requirements: 12.1, 12.2, 12.3_
+
+- [ ]* 22. Implement testing
+  - [ ]* 22.1 Write unit tests for utilities
+    - Test validation schemas
+    - Test data transformation functions
+    - Test constraint checking logic
+    - _Requirements: 1.7, 5.6_
+  - [ ]* 22.2 Write integration tests
+    - Test Server Actions with test database
+    - Test Prisma queries
+    - Mock solver API calls
+    - _Requirements: 4.1, 5.1_
+  - [ ]* 22.3 Write solver service tests
+    - Test API endpoints with pytest
+    - Test constraint validation
+    - Test solver with small problem instances
+    - _Requirements: 4.8, 5.2_
+  - [ ]* 22.4 Write E2E tests
+    - Test admin login and course creation flow
+    - Test timetable generation flow
+    - Test manual editing and validation
+    - Test export functionality
+    - Test role-based access control
+    - _Requirements: 2.7, 4.1, 6.2, 7.3_
+
+- [ ]* 23. Add CI/CD pipeline
+  - [ ]* 23.1 Create GitHub Actions workflow
+    - Set up Node.js and Python environments
+    - Run linting and type checking
+    - Run unit and integration tests
+    - Build Docker images
+    - _Requirements: 12.1, 12.2_
+  - [ ]* 23.2 Add deployment automation
+    - Configure deployment to staging environment
+    - Add manual approval for production
+    - Set up environment secrets
+    - _Requirements: 12.1, 12.2_
+
+- [ ]* 24. Performance optimization and documentation
+  - [ ]* 24.1 Optimize database queries
+    - Add database indexes
+    - Optimize Prisma includes and selects
+    - Implement query result caching
+    - _Requirements: 11.6_
+  - [ ]* 24.2 Optimize solver performance
+    - Tune CP-SAT solver parameters
+    - Implement result caching for repeated problems
+    - Add performance logging
+    - _Requirements: 4.8_
+  - [ ]* 24.3 Create comprehensive documentation
+    - Write API documentation
+    - Document solver algorithm
+    - Create user guide
+    - Add architecture diagrams
+    - _Requirements: 10.6_
