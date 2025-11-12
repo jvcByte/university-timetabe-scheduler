@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth-utils";
 import { getCourseById } from "@/lib/courses";
+import { getDepartments } from "@/lib/departments";
 import { CourseForm } from "@/components/course-form";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -20,7 +21,10 @@ export default async function EditCoursePage({ params }: PageProps) {
     notFound();
   }
 
-  const course = await getCourseById(courseId);
+  const [course, departments] = await Promise.all([
+    getCourseById(courseId),
+    getDepartments(),
+  ]);
 
   if (!course) {
     notFound();
@@ -40,7 +44,7 @@ export default async function EditCoursePage({ params }: PageProps) {
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold mb-6 text-gray-900">Edit Course</h1>
-          <CourseForm course={course} />
+          <CourseForm course={course} departments={departments} />
         </div>
       </div>
     </div>

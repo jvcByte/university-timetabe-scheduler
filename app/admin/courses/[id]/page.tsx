@@ -54,7 +54,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             <h3 className="text-sm font-medium text-gray-500 mb-1">
               Department
             </h3>
-            <p className="text-lg">{course.department}</p>
+            <p className="text-lg">{course.department.name}</p>
           </div>
 
           <div>

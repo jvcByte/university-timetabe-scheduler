@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth-utils";
+import { getDepartments } from "@/lib/departments";
 import { CourseForm } from "@/components/course-form";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -6,6 +7,8 @@ import Link from "next/link";
 
 export default async function NewCoursePage() {
   await requireAdmin();
+  
+  const departments = await getDepartments();
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -21,7 +24,7 @@ export default async function NewCoursePage() {
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold mb-6 text-gray-900">Create New Course</h1>
-          <CourseForm />
+          <CourseForm departments={departments} />
         </div>
       </div>
     </div>

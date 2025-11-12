@@ -9,12 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   createCourse,
   updateCourse,
   type CourseInput,
 } from "@/actions/courses";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import type { Department } from "@/lib/departments";
 
 const courseFormSchema = z.object({
   code: z
@@ -39,10 +47,10 @@ const courseFormSchema = z.object({
     .int("Credits must be an integer")
     .min(1, "Credits must be at least 1")
     .max(10, "Credits must be at most 10"),
-  department: z
-    .string()
-    .min(2, "Department must be at least 2 characters")
-    .max(100, "Department must be at most 100 characters"),
+  departmentId: z.coerce
+    .number()
+    .int("Department ID must be an integer")
+    .positive("Department must be selected"),
   roomType: z.string().max(50, "Room type must be at most 50 characters").optional(),
 });
 
@@ -55,14 +63,18 @@ interface CourseFormProps {
     title: string;
     duration: number;
     credits: number;
-    department: string;
+    department: {
+      id: number;
+      name: string;
+    };
     roomType: string | null;
   };
+  departments: Department[];
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
+export function CourseForm({ course, departments, onSuccess, onCancel }: CourseFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -70,6 +82,8 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
@@ -79,7 +93,7 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
           title: course.title,
           duration: course.duration,
           credits: course.credits,
-          department: course.department,
+          departmentId: course.department.id,
           roomType: course.roomType || "",
         }
       : {
@@ -87,6 +101,8 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
           credits: 3,
         },
   });
+
+  const departmentId = watch("departmentId");
 
   const onSubmit = async (data: CourseFormData) => {
     setIsSubmitting(true);
@@ -97,7 +113,7 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
         title: data.title,
         duration: data.duration,
         credits: data.credits,
-        department: data.department,
+        departmentId: data.departmentId,
         roomType: data.roomType || null,
         instructorIds: [],
         groupIds: [],
@@ -144,7 +160,7 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
         <Input
           id="code"
           {...register("code")}
-          placeholder="CS101"
+          placeholder="CSC101"
           disabled={isSubmitting}
         />
         {errors.code && (
@@ -196,15 +212,25 @@ export function CourseForm({ course, onSuccess, onCancel }: CourseFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="department">Department *</Label>
-        <Input
-          id="department"
-          {...register("department")}
-          placeholder="Computer Science"
+        <Label htmlFor="departmentId">Department *</Label>
+        <Select
+          value={departmentId?.toString()}
+          onValueChange={(value) => setValue("departmentId", Number(value))}
           disabled={isSubmitting}
-        />
-        {errors.department && (
-          <p className="text-sm text-red-600">{errors.department.message}</p>
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select department" />
+          </SelectTrigger>
+          <SelectContent>
+            {departments.map((dept) => (
+              <SelectItem key={dept.id} value={dept.id.toString()}>
+                {dept.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.departmentId && (
+          <p className="text-sm text-red-600">{errors.departmentId.message}</p>
         )}
       </div>
 
