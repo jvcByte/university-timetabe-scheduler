@@ -141,20 +141,20 @@
     - Implement working hours time picker
     - _Requirements: 3.6, 3.7, 3.8, 3.9_
 
-- [ ] 10. Build Python solver service foundation
-  - [ ] 10.1 Create FastAPI application structure
+- [x] 10. Build Python solver service foundation
+  - [x] 10.1 Create FastAPI application structure
     - Initialize FastAPI app with CORS and middleware
     - Set up Pydantic models for request/response
     - Create API key authentication dependency
     - Configure logging and error handlers
     - _Requirements: 10.1, 10.2, 10.6_
-  - [ ] 10.2 Define Pydantic schemas
+  - [x] 10.2 Define Pydantic schemas
     - Create CourseInput, InstructorInput, RoomInput, StudentGroupInput models
     - Create ConstraintConfigInput model
     - Create GenerationPayload model
     - Create AssignmentOutput, TimetableResult, ValidationResult models
     - _Requirements: 4.1, 5.1_
-  - [ ] 10.3 Implement API endpoints
+  - [x] 10.3 Implement API endpoints
     - Create POST /api/v1/generate endpoint
     - Create POST /api/v1/validate endpoint
     - Create GET /api/v1/health endpoint
