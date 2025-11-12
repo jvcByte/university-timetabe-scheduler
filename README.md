@@ -28,7 +28,7 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+ and pnpm
 - Python 3.11+
 - Docker and Docker Compose (for containerized deployment)
 
@@ -39,7 +39,7 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 #### 1. Install Web Application Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 #### 2. Set Up Environment Variables
@@ -57,8 +57,8 @@ Update the values in `.env` as needed.
 Generate Prisma client and create the database:
 
 ```bash
-npm run db:generate
-npm run db:push
+pnpm run db:generate
+pnpm run db:push
 ```
 
 #### 4. Install Solver Service Dependencies
@@ -76,7 +76,7 @@ cd ..
 In one terminal, start the Next.js development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 In another terminal, start the solver service:
@@ -158,13 +158,13 @@ docker-compose down -v
 
 ### Web Application
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
-- `npm run db:migrate` - Run database migrations
+- `pnpm run dev` - Start development server
+- `pnpm run build` - Build for production
+- `pnpm run start` - Start production server
+- `pnpm run lint` - Run ESLint
+- `pnpm run db:generate` - Generate Prisma client
+- `pnpm run db:push` - Push schema to database
+- `pnpm run db:migrate` - Run database migrations
 
 ### Solver Service
 
