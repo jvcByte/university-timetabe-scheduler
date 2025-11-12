@@ -112,14 +112,14 @@
     - Display group size and program information
     - _Requirements: 1.4, 1.8_
 
-- [ ] 8. Implement CSV/Excel import and export
-  - [ ] 8.1 Create import functionality
+- [x] 8. Implement CSV/Excel import and export
+  - [x] 8.1 Create import functionality
     - Implement CSV parser using papaparse
     - Add Excel parser using xlsx library
     - Create validation logic for imported data
     - Build import UI with file upload and preview
     - _Requirements: 1.5, 1.6, 1.7_
-  - [ ] 8.2 Create export functionality
+  - [x] 8.2 Create export functionality
     - Implement CSV export for all entity types
     - Implement Excel export with formatting
     - Add export Server Actions

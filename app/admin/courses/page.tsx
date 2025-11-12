@@ -5,6 +5,7 @@ import { CoursesTable } from "@/components/courses-table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { ImportExportButtons } from "@/components/import-export-buttons";
 
 interface PageProps {
   searchParams: Promise<{
@@ -36,12 +37,15 @@ export default async function CoursesPage({ searchParams }: PageProps) {
             Manage course catalog and curriculum
           </p>
         </div>
-        <Link href="/admin/courses/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Course
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <ImportExportButtons entityType="courses" />
+          <Link href="/admin/courses/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Course
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <CoursesTable

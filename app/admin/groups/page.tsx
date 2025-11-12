@@ -4,6 +4,7 @@ import { StudentGroupsTable } from "@/components/student-groups-table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { ImportExportButtons } from "@/components/import-export-buttons";
 
 interface PageProps {
   searchParams: Promise<{
@@ -39,12 +40,15 @@ export default async function StudentGroupsPage({ searchParams }: PageProps) {
             Manage student groups and their course assignments
           </p>
         </div>
-        <Link href="/admin/groups/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Student Group
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <ImportExportButtons entityType="studentGroups" />
+          <Link href="/admin/groups/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Student Group
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <StudentGroupsTable

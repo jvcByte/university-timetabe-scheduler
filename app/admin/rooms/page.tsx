@@ -4,6 +4,7 @@ import { RoomsTable } from "@/components/rooms-table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { ImportExportButtons } from "@/components/import-export-buttons";
 
 interface PageProps {
   searchParams: Promise<{
@@ -35,12 +36,15 @@ export default async function RoomsPage({ searchParams }: PageProps) {
             Manage classrooms, labs, and other facilities
           </p>
         </div>
-        <Link href="/admin/rooms/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Room
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <ImportExportButtons entityType="rooms" />
+          <Link href="/admin/rooms/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Room
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <RoomsTable

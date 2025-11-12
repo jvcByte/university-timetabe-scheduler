@@ -5,6 +5,7 @@ import { InstructorsTable } from "@/components/instructors-table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { ImportExportButtons } from "@/components/import-export-buttons";
 
 interface PageProps {
   searchParams: Promise<{
@@ -36,12 +37,15 @@ export default async function InstructorsPage({ searchParams }: PageProps) {
             Manage faculty members and their availability
           </p>
         </div>
-        <Link href="/admin/instructors/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Instructor
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <ImportExportButtons entityType="instructors" />
+          <Link href="/admin/instructors/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Instructor
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <InstructorsTable
