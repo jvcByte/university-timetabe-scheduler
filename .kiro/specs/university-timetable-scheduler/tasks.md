@@ -283,23 +283,23 @@
     - Validate changes before saving
     - _Requirements: 6.2, 6.3_
 
-- [ ] 16. Implement timetable publishing
-  - [ ] 16.1 Create publish Server Action
+- [x] 16. Implement timetable publishing
+  - [x] 16.1 Create publish Server Action
     - Build `publishTimetable` action
     - Update timetable status to PUBLISHED
     - Set publishedAt timestamp
     - Revalidate relevant pages
     - _Requirements: 7.1, 7.2_
-  - [ ] 16.2 Implement role-based timetable access
+  - [x] 16.2 Implement role-based timetable access
     - Filter published timetables for Faculty users (show their schedule)
     - Filter published timetables for Student users (show their group schedule)
     - _Requirements: 7.5, 7.6_
-  - [ ] 16.3 Create faculty schedule view
+  - [x] 16.3 Create faculty schedule view
     - Build page showing instructor's teaching schedule
     - Display only assignments for logged-in faculty
     - Add calendar and list views
     - _Requirements: 7.5_
-  - [ ] 16.4 Create student schedule view
+  - [x] 16.4 Create student schedule view
     - Build page showing student group's class schedule
     - Display only assignments for student's group
     - Add calendar and list views

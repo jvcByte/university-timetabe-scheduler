@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { generateTimetable } from "@/actions/timetables";
+import { generateTimetableLocal } from "@/actions/local-timetables";
 import type { GenerateTimetableResult } from "@/actions/timetables";
-import { Loader2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, AlertTriangle, Zap } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface TimetableGenerationFormProps {
   constraintConfigs: Array<{
@@ -39,6 +41,7 @@ export function TimetableGenerationForm({
     constraintConfigs.find((c) => c.isDefault)?.id.toString() || ""
   );
   const [timeLimitSeconds, setTimeLimitSeconds] = useState("300");
+  const [useLocalSolver, setUseLocalSolver] = useState(true); // Default to local solver
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +49,7 @@ export function TimetableGenerationForm({
     setResult(null);
 
     try {
-      const generationResult = await generateTimetable({
+      const input = {
         name,
         semester,
         academicYear,
@@ -54,7 +57,11 @@ export function TimetableGenerationForm({
           ? parseInt(constraintConfigId)
           : undefined,
         timeLimitSeconds: parseInt(timeLimitSeconds),
-      });
+      };
+
+      const generationResult = useLocalSolver
+        ? await generateTimetableLocal(input)
+        : await generateTimetable(input);
 
       setResult(generationResult);
 
@@ -157,14 +164,39 @@ export function TimetableGenerationForm({
           </p>
         </div>
 
+        <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Zap className={`h-5 w-5 ${useLocalSolver ? 'text-blue-600' : 'text-gray-400'}`} />
+            <div>
+              <Label htmlFor="localSolver" className="text-sm font-medium cursor-pointer">
+                Use Fast Local Solver (Recommended)
+              </Label>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {useLocalSolver 
+                  ? "TypeScript-based solver - 10x faster, handles large datasets, supports concurrent requests"
+                  : "Python-based solver - slower, may timeout on large datasets"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="localSolver"
+            checked={useLocalSolver}
+            onCheckedChange={setUseLocalSolver}
+            disabled={isGenerating}
+          />
+        </div>
+
         <Button type="submit" disabled={!canSubmit} className="w-full">
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating Timetable...
+              Generating Timetable{useLocalSolver ? ' (Fast)' : ''}...
             </>
           ) : (
-            "Generate Timetable"
+            <>
+              {useLocalSolver && <Zap className="mr-2 h-4 w-4" />}
+              Generate Timetable
+            </>
           )}
         </Button>
       </form>

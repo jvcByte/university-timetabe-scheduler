@@ -489,6 +489,170 @@ export async function archiveTimetable(id: number) {
 }
 
 /**
+ * Get published timetables for a faculty member (filtered by their assignments)
+ */
+export async function getPublishedTimetablesForFaculty(instructorId: number) {
+  try {
+    // Find all published timetables that have assignments for this instructor
+    const timetables = await prisma.timetable.findMany({
+      where: {
+        status: "PUBLISHED",
+        assignments: {
+          some: {
+            instructorId,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { assignments: true },
+        },
+      },
+      orderBy: { publishedAt: "desc" },
+    });
+
+    return { success: true, timetables };
+  } catch (error: any) {
+    console.error("Failed to get faculty timetables:", error);
+    return {
+      success: false,
+      error: "Failed to get timetables",
+      timetables: [],
+    };
+  }
+}
+
+/**
+ * Get published timetables for a student (filtered by their group's assignments)
+ */
+export async function getPublishedTimetablesForStudent(groupId: number) {
+  try {
+    // Find all published timetables that have assignments for this group
+    const timetables = await prisma.timetable.findMany({
+      where: {
+        status: "PUBLISHED",
+        assignments: {
+          some: {
+            groupId,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { assignments: true },
+        },
+      },
+      orderBy: { publishedAt: "desc" },
+    });
+
+    return { success: true, timetables };
+  } catch (error: any) {
+    console.error("Failed to get student timetables:", error);
+    return {
+      success: false,
+      error: "Failed to get timetables",
+      timetables: [],
+    };
+  }
+}
+
+/**
+ * Get a published timetable with assignments filtered for a faculty member
+ */
+export async function getPublishedTimetableForFaculty(
+  timetableId: number,
+  instructorId: number
+) {
+  try {
+    const timetable = await prisma.timetable.findFirst({
+      where: {
+        id: timetableId,
+        status: "PUBLISHED",
+      },
+      include: {
+        assignments: {
+          where: {
+            instructorId,
+          },
+          include: {
+            course: true,
+            instructor: true,
+            room: true,
+            group: true,
+          },
+          orderBy: [{ day: "asc" }, { startTime: "asc" }],
+        },
+      },
+    });
+
+    if (!timetable) {
+      return {
+        success: false,
+        error: "Timetable not found or not published",
+        timetable: null,
+      };
+    }
+
+    return { success: true, timetable };
+  } catch (error: any) {
+    console.error("Failed to get faculty timetable:", error);
+    return {
+      success: false,
+      error: "Failed to get timetable",
+      timetable: null,
+    };
+  }
+}
+
+/**
+ * Get a published timetable with assignments filtered for a student group
+ */
+export async function getPublishedTimetableForStudent(
+  timetableId: number,
+  groupId: number
+) {
+  try {
+    const timetable = await prisma.timetable.findFirst({
+      where: {
+        id: timetableId,
+        status: "PUBLISHED",
+      },
+      include: {
+        assignments: {
+          where: {
+            groupId,
+          },
+          include: {
+            course: true,
+            instructor: true,
+            room: true,
+            group: true,
+          },
+          orderBy: [{ day: "asc" }, { startTime: "asc" }],
+        },
+      },
+    });
+
+    if (!timetable) {
+      return {
+        success: false,
+        error: "Timetable not found or not published",
+        timetable: null,
+      };
+    }
+
+    return { success: true, timetable };
+  } catch (error: any) {
+    console.error("Failed to get student timetable:", error);
+    return {
+      success: false,
+      error: "Failed to get timetable",
+      timetable: null,
+    };
+  }
+}
+
+/**
  * Get filter options for a timetable (rooms, instructors, groups used in assignments)
  */
 export async function getTimetableFilterOptions(timetableId: number) {
