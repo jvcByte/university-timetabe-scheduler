@@ -305,20 +305,20 @@
     - Add calendar and list views
     - _Requirements: 7.6_
 
-- [ ] 17. Implement export functionality
-  - [ ] 17.1 Create PDF export
+- [x] 17. Implement export functionality
+  - [x] 17.1 Create PDF export
     - Build PDF generation using react-pdf or puppeteer
     - Create formatted timetable layout
     - Support filtered exports (by room, instructor, group)
     - Implement `exportTimetablePDF` Server Action
     - _Requirements: 7.3, 7.7_
-  - [ ] 17.2 Create Excel export
+  - [x] 17.2 Create Excel export
     - Build Excel generation using xlsx library
     - Format timetable data in spreadsheet
     - Include multiple sheets for different views
     - Implement `exportTimetableExcel` Server Action
     - _Requirements: 7.4, 7.7_
-  - [ ] 17.3 Add export UI
+  - [x] 17.3 Add export UI
     - Create export button with format selection
     - Add filter options for export scope
     - Handle download and error states

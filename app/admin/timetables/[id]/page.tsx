@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TimetableDetailView } from "@/components/timetable-detail-view";
 import { Button } from "@/components/ui/button";
+import { TimetableExportButton } from "@/components/timetable-export-button";
 
 interface TimetableDetailPageProps {
   params: Promise<{
@@ -60,6 +61,11 @@ export default async function TimetableDetailPage({
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <TimetableExportButton
+                timetableId={timetableId}
+                timetableName={timetable.name}
+                filterOptions={filterOptions}
+              />
               <Link href={`/admin/timetables/${timetableId}/edit`}>
                 <Button variant="outline" size="sm">
                   <Edit className="h-4 w-4 mr-2" />

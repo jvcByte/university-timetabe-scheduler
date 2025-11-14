@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, List } from "lucide-react";
 import { notFound } from "next/navigation";
+import { SimpleExportButton } from "@/components/simple-export-button";
 
 interface PageProps {
   params: {
@@ -94,7 +95,14 @@ export default async function FacultyScheduleDetailPage({ params }: PageProps) {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{timetable.name}</h1>
+        <div className="flex justify-between items-start mb-2">
+          <h1 className="text-3xl font-bold">{timetable.name}</h1>
+          <SimpleExportButton
+            timetableId={timetableId}
+            timetableName={timetable.name}
+            filters={{ instructorId: instructor.id }}
+          />
+        </div>
         <div className="flex gap-4 text-gray-600">
           <span>
             📅 {timetable.semester} {timetable.academicYear}
