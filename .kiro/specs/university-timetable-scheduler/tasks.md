@@ -324,24 +324,24 @@
     - Handle download and error states
     - _Requirements: 7.3, 7.4_
 
-- [ ] 18. Implement faculty availability management
-  - [ ] 18.1 Create availability editor component
+- [x] 18. Implement faculty availability management
+  - [x] 18.1 Create availability editor component
     - Build weekly time grid UI
     - Allow marking time slots as available/unavailable
     - Support setting preferred time slots
     - Store availability as JSON
     - _Requirements: 8.1, 8.2, 8.3_
-  - [ ] 18.2 Build availability Server Actions
+  - [x] 18.2 Build availability Server Actions
     - Create `updateInstructorAvailability` action
     - Validate availability data
     - Update instructor record
     - _Requirements: 8.2, 8.6_
-  - [ ] 18.3 Create faculty availability page
+  - [x] 18.3 Create faculty availability page
     - Build page for faculty to manage their availability
     - Display current availability
     - Allow updates at any time
     - _Requirements: 8.1, 8.6_
-  - [ ] 18.4 Integrate availability into solver
+  - [x] 18.4 Integrate availability into solver
     - Ensure solver respects instructor availability as hard constraints
     - Use preferences as soft constraints
     - _Requirements: 8.4, 8.5_

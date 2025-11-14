@@ -110,7 +110,7 @@ export async function createInstructor(
         departmentId: validated.departmentId,
         teachingLoad: validated.teachingLoad,
         availability: validated.availability,
-        preferences: validated.preferences ?? undefined,
+        preferences: validated.preferences || undefined,
         userId: validated.userId || null,
       },
     });
@@ -207,7 +207,7 @@ export async function updateInstructor(
         departmentId: validated.departmentId,
         teachingLoad: validated.teachingLoad,
         availability: validated.availability,
-        preferences: validated.preferences ?? undefined,
+        preferences: validated.preferences || undefined,
         userId: validated.userId || null,
       },
     });
@@ -285,6 +285,65 @@ export async function deleteInstructor(
     return {
       success: false,
       error: "Failed to delete instructor. Please try again.",
+    };
+  }
+}
+
+/**
+ * Update instructor availability (for faculty users)
+ */
+export async function updateInstructorAvailability(
+  instructorId: number,
+  availability: Record<string, string[]>,
+  preferences?: { preferredDays?: string[]; preferredTimes?: string[] }
+): Promise<ActionResult> {
+  try {
+    // Validate availability data
+    const validated = availabilitySchema.parse(availability);
+    
+    // Validate preferences if provided
+    let validatedPreferences = null;
+    if (preferences) {
+      validatedPreferences = preferencesSchema.parse(preferences);
+    }
+
+    // Check if instructor exists
+    const instructor = await prisma.instructor.findUnique({
+      where: { id: instructorId },
+    });
+
+    if (!instructor) {
+      return {
+        success: false,
+        error: "Instructor not found",
+      };
+    }
+
+    // Update instructor availability and preferences
+    await prisma.instructor.update({
+      where: { id: instructorId },
+      data: {
+        availability: validated,
+        preferences: validatedPreferences || undefined,
+      },
+    });
+
+    revalidatePath("/faculty");
+    revalidatePath("/faculty/availability");
+    revalidatePath(`/admin/instructors/${instructorId}`);
+    
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0].message,
+      };
+    }
+    console.error("Failed to update instructor availability:", error);
+    return {
+      success: false,
+      error: "Failed to update availability. Please try again.",
     };
   }
 }
