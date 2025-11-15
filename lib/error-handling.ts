@@ -328,10 +328,10 @@ export function handleSolverError(error: unknown): {
 
     if (error.name === "SolverConnectionError") {
       return {
-        message: "Cannot connect to solver service",
+        message: "Cannot connect to Python-based solver service",
         code: ErrorCode.SOLVER_CONNECTION_ERROR,
         details:
-          "The solver service is unavailable. Please check that it is running and try again.",
+          "The Python-based solver service is unavailable. Please use the recommended solver.",
       };
     }
 
