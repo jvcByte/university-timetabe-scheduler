@@ -6,6 +6,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
 
+  const isPublicRoute = nextUrl.pathname === "/";
   const isAuthRoute = nextUrl.pathname.startsWith("/login") || 
                       nextUrl.pathname.startsWith("/register");
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
@@ -13,11 +14,25 @@ export default auth((req) => {
   const isStudentRoute = nextUrl.pathname.startsWith("/student");
   const isApiRoute = nextUrl.pathname.startsWith("/api");
 
+  // Allow public routes (index page)
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   // Allow auth routes and API auth routes
   if (isAuthRoute || nextUrl.pathname.startsWith("/api/auth")) {
     if (isLoggedIn && isAuthRoute) {
-      // Redirect logged-in users away from auth pages
-      return NextResponse.redirect(new URL("/", nextUrl));
+      // Redirect logged-in users away from auth pages to their dashboard
+      switch (userRole) {
+        case "ADMIN":
+          return NextResponse.redirect(new URL("/admin", nextUrl));
+        case "FACULTY":
+          return NextResponse.redirect(new URL("/faculty", nextUrl));
+        case "STUDENT":
+          return NextResponse.redirect(new URL("/student", nextUrl));
+        default:
+          return NextResponse.redirect(new URL("/", nextUrl));
+      }
     }
     return NextResponse.next();
   }
