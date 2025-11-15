@@ -7,11 +7,12 @@ import { Day, TimetableStatus } from '@prisma/client';
 
 // Entity counts
 export async function getEntityCounts() {
-  const [courses, instructors, rooms, groups, timetables] = await Promise.all([
+  const [courses, instructors, rooms, groups, students, timetables] = await Promise.all([
     prisma.course.count(),
     prisma.instructor.count(),
     prisma.room.count(),
     prisma.studentGroup.count(),
+    prisma.student.count(),
     prisma.timetable.count(),
   ]);
 
@@ -20,6 +21,7 @@ export async function getEntityCounts() {
     instructors,
     rooms,
     groups,
+    students,
     timetables,
   };
 }
@@ -278,36 +280,52 @@ export async function getFacultyDashboardData(userId: string) {
 
 // Get student-specific dashboard data
 export async function getStudentDashboardData(userId: string) {
-  const studentGroup = await prisma.studentGroup.findUnique({
+  // First find the student by userId
+  const student = await prisma.student.findUnique({
     where: { userId },
     include: {
-      assignments: {
-        where: {
-          timetable: {
-            status: TimetableStatus.PUBLISHED,
+      group: {
+        include: {
+          assignments: {
+            where: {
+              timetable: {
+                status: TimetableStatus.PUBLISHED,
+              },
+            },
+            include: {
+              course: true,
+              instructor: true,
+              room: true,
+              timetable: true,
+            },
+            orderBy: [{ day: 'asc' }, { startTime: 'asc' }],
           },
-        },
-        include: {
-          course: true,
-          instructor: true,
-          room: true,
-          timetable: true,
-        },
-        orderBy: [{ day: 'asc' }, { startTime: 'asc' }],
-      },
-      courses: {
-        include: {
-          course: true,
+          courses: {
+            include: {
+              course: true,
+            },
+          },
         },
       },
     },
   });
 
-  if (!studentGroup) {
+  if (!student || !student.group) {
     return null;
   }
 
+  const studentGroup = student.group;
+
   return {
+    student: {
+      id: student.id,
+      studentId: student.studentId,
+      name: student.name,
+      email: student.email,
+      program: student.program,
+      year: student.year,
+      semester: student.semester,
+    },
     group: {
       id: studentGroup.id,
       name: studentGroup.name,
@@ -317,7 +335,7 @@ export async function getStudentDashboardData(userId: string) {
       size: studentGroup.size,
     },
     assignments: studentGroup.assignments,
-    courses: studentGroup.courses.map((cg) => cg.course),
+    courses: studentGroup.courses.map((cg: any) => cg.course),
     upcomingClasses: studentGroup.assignments.slice(0, 5),
   };
 }

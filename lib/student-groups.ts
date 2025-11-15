@@ -12,7 +12,18 @@ export type StudentGroupWithRelations = Prisma.StudentGroupGetPayload<{
         };
       };
     };
-    user: true;
+    students: {
+      include: {
+        user: {
+          select: {
+            id: true;
+            email: true;
+            name: true;
+            role: true;
+          };
+        };
+      };
+    };
   };
 }>;
 
@@ -25,7 +36,13 @@ export type StudentGroupListItem = Prisma.StudentGroupGetPayload<{
       };
     };
   };
-}>;
+}> & {
+  _count: {
+    courses: number;
+    assignments: number;
+    students: number;
+  };
+};
 
 export interface GetStudentGroupsParams {
   page?: number;
@@ -83,13 +100,28 @@ export async function getStudentGroups(params: GetStudentGroupsParams = {}) {
             assignments: true,
           },
         },
+        students: {
+          select: {
+            id: true,
+          },
+        },
       },
     }),
     prisma.studentGroup.count({ where }),
   ]);
 
+  // Transform to include student count
+  const groupsWithCount = groups.map((group) => ({
+    ...group,
+    _count: {
+      ...group._count,
+      students: group.students.length,
+    },
+    students: undefined, // Remove the students array from the response
+  }));
+
   return {
-    groups,
+    groups: groupsWithCount as any,
     pagination: {
       page,
       pageSize,
@@ -112,10 +144,22 @@ export async function getStudentGroupById(id: number) {
           },
         },
       },
-      user: true,
+      students: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+            },
+          },
+        },
+      },
       _count: {
         select: {
           assignments: true,
+          students: true,
         },
       },
     },

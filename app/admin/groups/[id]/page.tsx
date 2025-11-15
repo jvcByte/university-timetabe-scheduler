@@ -1,7 +1,8 @@
 import { requireAdmin } from "@/lib/auth-utils";
 import { getStudentGroupById } from "@/lib/student-groups";
+import { getStudentsByGroupId } from "@/lib/students";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Users, BookOpen, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, Users, BookOpen, Calendar, Mail, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -15,7 +16,10 @@ export default async function StudentGroupDetailPage({ params }: PageProps) {
   await requireAdmin();
 
   const { id } = await params;
-  const group = await getStudentGroupById(Number(id));
+  const [group, students] = await Promise.all([
+    getStudentGroupById(Number(id)),
+    getStudentsByGroupId(Number(id)),
+  ]);
 
   if (!group) {
     notFound();
@@ -88,6 +92,64 @@ export default async function StudentGroupDetailPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* Students */}
+          <div className="p-6 border-t">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Students ({students.length})
+              </h2>
+              <Link href={`/admin/students?groupId=${group.id}`}>
+                <Button variant="outline" size="sm">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Manage Students
+                </Button>
+              </Link>
+            </div>
+            {students.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 mb-4">No students assigned to this group yet</p>
+                <Link href="/admin/students/new">
+                  <Button size="sm">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add First Student
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {students.map((student: any) => (
+                  <div
+                    key={student.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold text-sm">
+                          {student.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{student.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span className="font-mono">{student.studentId}</span>
+                          <span>•</span>
+                          <Mail className="h-3 w-3" />
+                          <span>{student.email}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Link href={`/admin/students/${student.id}/edit`}>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Courses */}
           {group.courses.length > 0 && (
             <div className="p-6 border-t">
@@ -95,7 +157,7 @@ export default async function StudentGroupDetailPage({ params }: PageProps) {
                 Assigned Courses
               </h2>
               <div className="space-y-3">
-                {group.courses.map(({ course }) => (
+                {group.courses.map(({ course }: any) => (
                   <div
                     key={course.id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"

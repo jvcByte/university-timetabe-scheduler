@@ -16,14 +16,36 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  instructor   Instructor?
-  studentGroup StudentGroup?
+  instructor Instructor?
+  student    Student?
 }
 
 enum Role {
   ADMIN
   FACULTY
   STUDENT
+}
+
+model Student {
+  id              Int      @id @default(autoincrement())
+  userId          String?  @unique
+  studentId       String   @unique
+  name            String
+  email           String   @unique
+  year            Int?
+  semester        Int?
+  departmentId    Int?
+  studentGroupId  Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user       User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  group      StudentGroup? @relation(fields: [studentGroupId], references: [id], onDelete: SetNull)
+  
+  @@index([departmentId])
+  @@index([studentGroupId])
+  @@index([departmentId, year, semester])
 }
 
 model Department {
@@ -36,6 +58,7 @@ model Department {
   
   courses     Course[]
   instructors Instructor[]
+  students    Student[]
 }
 
 model Course {
@@ -100,8 +123,7 @@ model StudentGroup {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  user        User?         @relation(fields: [userId], references: [id])
-  userId      String?       @unique
+  students    Student[]
   courses     CourseGroup[]
   assignments Assignment[]
 }

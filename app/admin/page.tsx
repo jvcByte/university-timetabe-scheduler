@@ -64,6 +64,14 @@ export default async function AdminDashboard() {
 
           <div className="bg-white p-6 rounded-lg shadow-md flex-1 min-w-[200px]">
             <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-gray-600">Students</div>
+              <Users className="h-5 w-5 text-teal-600" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{entityCounts.students}</div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-md flex-1 min-w-[200px]">
+            <div className="flex items-center justify-between mb-2">
               <div className="text-sm text-gray-600">Student Groups</div>
               <Users className="h-5 w-5 text-indigo-600" />
             </div>
@@ -221,6 +229,18 @@ export default async function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">
                 Manage classrooms and facilities
+              </p>
+            </div>
+          </Link>
+
+          <Link href="/admin/students">
+            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Students</h3>
+                <Users className="h-8 w-8 text-teal-600" />
+              </div>
+              <p className="text-sm text-gray-600">
+                Manage individual students
               </p>
             </div>
           </Link>

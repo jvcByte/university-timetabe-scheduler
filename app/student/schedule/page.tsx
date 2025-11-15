@@ -8,12 +8,17 @@ import { ArrowLeft } from "lucide-react";
 export default async function StudentSchedulePage() {
   const session = await requireStudent();
 
-  // Get the student group record for this user
-  const studentGroup = await prisma.studentGroup.findUnique({
+  // Get the student record for this user
+  const student = await prisma.student.findUnique({
     where: { userId: session.user.id },
+    include: {
+      group: true,
+    },
   });
 
-  if (!studentGroup) {
+  const studentGroup = student?.group;
+
+  if (!student || !studentGroup) {
     return (
       <div className="p-8">
         <div className="mb-6">

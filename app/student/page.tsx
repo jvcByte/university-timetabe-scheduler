@@ -9,17 +9,24 @@ import { Calendar, Users, BookOpen, GraduationCap, MapPin, Clock } from "lucide-
 export default async function StudentDashboard() {
   const session = await requireStudent();
 
-  // Get the student group record for this user
-  const studentGroup = await prisma.studentGroup.findUnique({
+  // Get the student record for this user
+  const student = await prisma.student.findUnique({
     where: { userId: session.user.id },
     include: {
-      courses: {
+      department: true,
+      group: {
         include: {
-          course: true,
+          courses: {
+            include: {
+              course: true,
+            },
+          },
         },
       },
     },
   });
+
+  const studentGroup = student?.group;
 
   // Get published timetables if student group exists
   let timetables: any[] = [];

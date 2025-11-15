@@ -196,6 +196,7 @@ export function StudentGroupsTable({
               <TableHead>Year</TableHead>
               <TableHead>Semester</TableHead>
               <TableHead>Size</TableHead>
+              <TableHead>Students</TableHead>
               <TableHead>Courses</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -203,7 +204,7 @@ export function StudentGroupsTable({
           <TableBody>
             {groups.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                   No student groups found. Create your first group to get started.
                 </TableCell>
               </TableRow>
@@ -214,7 +215,12 @@ export function StudentGroupsTable({
                   <TableCell>{group.program}</TableCell>
                   <TableCell>Year {group.year}</TableCell>
                   <TableCell>Semester {group.semester}</TableCell>
-                  <TableCell>{group.size} students</TableCell>
+                  <TableCell>{group.size}</TableCell>
+                  <TableCell>
+                    <span className={group._count.students > 0 ? "text-green-600 font-medium" : "text-gray-400"}>
+                      {group._count.students}
+                    </span>
+                  </TableCell>
                   <TableCell>{group._count.courses}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
