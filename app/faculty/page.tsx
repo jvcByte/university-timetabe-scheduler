@@ -1,9 +1,10 @@
 import { requireFaculty } from "@/lib/auth-utils";
 import { prisma } from "@/lib/db";
 import { getPublishedTimetablesForFaculty } from "@/actions/timetables";
+import { getFacultyDashboardData } from "@/lib/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, BookOpen } from "lucide-react";
+import { Calendar, Clock, BookOpen, TrendingUp, Users, MapPin } from "lucide-react";
 
 export default async function FacultyDashboard() {
   const session = await requireFaculty();
@@ -18,10 +19,31 @@ export default async function FacultyDashboard() {
 
   // Get published timetables if instructor exists
   let timetables: any[] = [];
+  let dashboardData: any = null;
+  
   if (instructor) {
     const result = await getPublishedTimetablesForFaculty(instructor.id);
     timetables = result.timetables || [];
+    dashboardData = await getFacultyDashboardData(session.user.id);
   }
+
+  // Helper function to get day name
+  const getDayName = (day: string) => {
+    return day.charAt(0) + day.slice(1).toLowerCase();
+  };
+
+  // Helper function to group assignments by day
+  const groupAssignmentsByDay = (assignments: any[]) => {
+    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+    const grouped: Record<string, any[]> = {};
+    
+    days.forEach(day => {
+      grouped[day] = assignments.filter(a => a.day === day)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    });
+    
+    return grouped;
+  };
 
   return (
     <div className="p-8">
@@ -31,8 +53,8 @@ export default async function FacultyDashboard() {
       </p>
 
       {/* Quick Stats */}
-      {instructor && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {instructor && dashboardData && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -55,7 +77,7 @@ export default async function FacultyDashboard() {
               <div>
                 <div className="text-sm text-gray-600">Teaching Load</div>
                 <div className="text-lg font-semibold">
-                  {instructor.teachingLoad} hours/week
+                  {dashboardData.instructor.assignedHours}h / {dashboardData.instructor.teachingLoad}h
                 </div>
               </div>
             </div>
@@ -64,11 +86,29 @@ export default async function FacultyDashboard() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-purple-100 p-3 rounded-lg">
-                <Calendar className="h-6 w-6 text-purple-600" />
+                <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <div className="text-sm text-gray-600">Published Schedules</div>
-                <div className="text-lg font-semibold">{timetables.length}</div>
+                <div className="text-sm text-gray-600">Load Percentage</div>
+                <div className={`text-lg font-semibold ${
+                  dashboardData.instructor.loadPercentage > 100 ? 'text-red-600' :
+                  dashboardData.instructor.loadPercentage > 80 ? 'text-orange-600' :
+                  'text-green-600'
+                }`}>
+                  {dashboardData.instructor.loadPercentage}%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-orange-100 p-3 rounded-lg">
+                <Calendar className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Total Classes</div>
+                <div className="text-lg font-semibold">{dashboardData.assignments.length}</div>
               </div>
             </div>
           </div>
@@ -76,9 +116,9 @@ export default async function FacultyDashboard() {
       )}
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Teaching Schedule */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Calendar className="h-5 w-5" />
             My Teaching Schedule
@@ -90,7 +130,7 @@ export default async function FacultyDashboard() {
                 contact the administrator.
               </p>
             </div>
-          ) : timetables.length === 0 ? (
+          ) : !dashboardData || dashboardData.assignments.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">
                 No published schedules available yet.
@@ -100,65 +140,146 @@ export default async function FacultyDashboard() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {timetables.slice(0, 3).map((timetable) => (
-                <div
-                  key={timetable.id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{timetable.name}</div>
-                      <div className="text-sm text-gray-600">
-                        {timetable.semester} {timetable.academicYear}
+            <>
+              {/* Weekly Schedule Overview */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">This Week&apos;s Classes</h3>
+                <div className="space-y-2">
+                  {Object.entries(groupAssignmentsByDay(dashboardData.upcomingClasses)).map(([day, dayAssignments]) => {
+                    if ((dayAssignments as any[]).length === 0) return null;
+                    return (
+                      <div key={day} className="border rounded-lg p-3 bg-gray-50">
+                        <div className="font-medium text-sm text-gray-900 mb-2">
+                          {getDayName(day)}
+                        </div>
+                        <div className="space-y-2">
+                          {(dayAssignments as any[]).map((assignment) => (
+                            <div
+                              key={assignment.id}
+                              className="bg-white border border-gray-200 rounded p-3 hover:shadow-sm transition-shadow"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-semibold text-sm text-blue-600">
+                                      {assignment.course.code}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {assignment.startTime} - {assignment.endTime}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-700 mb-1">
+                                    {assignment.course.title}
+                                  </p>
+                                  <div className="flex items-center gap-3 text-xs text-gray-600">
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {assignment.room.name}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      {assignment.group.name}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Published Timetables */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">Published Timetables</h3>
+                <div className="space-y-2">
+                  {timetables.slice(0, 3).map((timetable) => (
+                    <div
+                      key={timetable.id}
+                      className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-sm">{timetable.name}</div>
+                          <div className="text-xs text-gray-600">
+                            {timetable.semester} {timetable.academicYear}
+                          </div>
+                        </div>
+                        <Link href={`/faculty/schedule/${timetable.id}`}>
+                          <Button size="sm" variant="outline">
+                            View
+                          </Button>
+                        </Link>
                       </div>
                     </div>
-                    <Link href={`/faculty/schedule/${timetable.id}`}>
-                      <Button size="sm" variant="outline">
-                        View
+                  ))}
+                  {timetables.length > 3 && (
+                    <Link href="/faculty/schedule">
+                      <Button variant="link" className="w-full text-sm">
+                        View all schedules →
                       </Button>
                     </Link>
-                  </div>
+                  )}
                 </div>
-              ))}
-              {timetables.length > 3 && (
-                <Link href="/faculty/schedule">
-                  <Button variant="link" className="w-full">
-                    View all schedules →
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
-          {instructor && (
-            <div className="mt-4">
-              <Link href="/faculty/schedule">
-                <Button className="w-full">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  View All Schedules
-                </Button>
-              </Link>
-            </div>
+              </div>
+            </>
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link href="/faculty/schedule">
-              <Button variant="outline" className="w-full justify-start">
-                <Calendar className="h-4 w-4 mr-2" />
-                View My Schedule
-              </Button>
-            </Link>
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <p className="text-sm text-gray-600">
-                Additional features like availability management will be
-                available in future updates.
-              </p>
+        {/* Quick Actions & Info */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-bold mb-4">Quick Actions</h2>
+            <div className="space-y-3">
+              <Link href="/faculty/schedule">
+                <Button variant="outline" className="w-full justify-start">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  View Full Schedule
+                </Button>
+              </Link>
+              <Link href="/faculty/availability">
+                <Button variant="outline" className="w-full justify-start">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Manage Availability
+                </Button>
+              </Link>
             </div>
           </div>
+
+          {/* Teaching Summary */}
+          {instructor && dashboardData && dashboardData.assignments.length > 0 && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-lg font-bold mb-4">Teaching Summary</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-gray-600">Total Classes</span>
+                  <span className="font-semibold">{dashboardData.assignments.length}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-gray-600">Hours/Week</span>
+                  <span className="font-semibold">{dashboardData.instructor.assignedHours}h</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-gray-600">Load Status</span>
+                  <span className={`font-semibold ${
+                    dashboardData.instructor.loadPercentage > 100 ? 'text-red-600' :
+                    dashboardData.instructor.loadPercentage > 80 ? 'text-orange-600' :
+                    'text-green-600'
+                  }`}>
+                    {dashboardData.instructor.loadPercentage}%
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-gray-600">Department</span>
+                  <span className="font-semibold text-sm">{instructor.department.name}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

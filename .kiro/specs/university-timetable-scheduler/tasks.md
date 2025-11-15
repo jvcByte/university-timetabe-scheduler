@@ -324,7 +324,7 @@
     - Handle download and error states
     - _Requirements: 7.3, 7.4_
 
-- [x] 18. Implement faculty availability management
+- [ ] 18. Implement faculty availability management
   - [x] 18.1 Create availability editor component
     - Build weekly time grid UI
     - Allow marking time slots as available/unavailable
@@ -346,25 +346,25 @@
     - Use preferences as soft constraints
     - _Requirements: 8.4, 8.5_
 
-- [ ] 19. Implement dashboard and analytics
-  - [ ] 19.1 Create dashboard data queries
+- [x] 19. Implement dashboard and analytics
+  - [x] 19.1 Create dashboard data queries
     - Write queries for entity counts
     - Calculate room utilization rates
     - Calculate instructor teaching load distribution
     - Fetch recent timetables and activity
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
-  - [ ] 19.2 Build admin dashboard
+  - [x] 19.2 Build admin dashboard
     - Create dashboard page with stats cards
     - Display entity counts (courses, instructors, rooms, groups)
     - Show timetable status overview
     - Add recent activity feed
     - _Requirements: 9.1, 9.5, 9.6_
-  - [ ] 19.3 Create analytics charts
+  - [x] 19.3 Create analytics charts
     - Build room utilization chart using Recharts
     - Create instructor load distribution chart
     - Display soft constraint violation breakdown
     - _Requirements: 9.2, 9.3, 9.4_
-  - [ ] 19.4 Implement role-specific dashboards
+  - [x] 19.4 Implement role-specific dashboards
     - Create faculty dashboard showing their schedule and stats
     - Create student dashboard showing their schedule
     - _Requirements: 9.1_

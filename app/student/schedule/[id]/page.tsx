@@ -9,14 +9,15 @@ import { notFound } from "next/navigation";
 import { SimpleExportButton } from "@/components/simple-export-button";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function StudentScheduleDetailPage({ params }: PageProps) {
   const session = await requireStudent();
-  const timetableId = parseInt(params.id);
+  const { id } = await params;
+  const timetableId = parseInt(id);
 
   if (isNaN(timetableId)) {
     notFound();

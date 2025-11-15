@@ -401,7 +401,7 @@ export function AvailabilityEditor({
       <div className="text-sm text-gray-600 space-y-1">
         <p>• Left-click and drag to mark time slots as available</p>
         <p>• Right-click or Ctrl+click to mark available slots as preferred</p>
-        <p>• Click "All" to mark entire day as available, "None" to clear</p>
+        <p>• Click &quot;All&quot; to mark entire day as available, &quot;None&quot; to clear</p>
       </div>
     </div>
   );
