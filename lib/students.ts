@@ -156,7 +156,6 @@ export async function getStudentByUserId(userId: string) {
   });
 }
 
-// Removed getPrograms() - use getDepartments() from lib/departments.ts instead
 
 export async function getStudentsByGroupId(groupId: number) {
   return prisma.student.findMany({
