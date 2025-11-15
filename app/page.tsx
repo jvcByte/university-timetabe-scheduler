@@ -2,12 +2,15 @@ import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Calendar, Users, BookOpen, TrendingUp, CheckCircle, Clock } from "lucide-react";
+import {
+  Calendar,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 
 export default async function Home() {
   const session = await auth();
 
-  // Redirect authenticated users to their dashboard
   if (session?.user) {
     switch (session.user.role) {
       case "ADMIN":
@@ -22,146 +25,91 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <main className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">TimeTable Scheduler</h1>
+      <header className="relative backdrop-blur-sm bg-white/80 border-b border-gray-200/40 shadow-sm py-4">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 group">
+            <div className="p-2.5 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
+              <Calendar className="h-6 w-6 text-white" />
             </div>
-            <Link href="/login">
-              <Button>Sign In</Button>
-            </Link>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                TimeTable Scheduler
+              </h1>
+              <p className="text-xs text-gray-600 font-medium">Smart Academic Planning</p>
+            </div>
           </div>
+          <Link href="/login">
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              Sign In
+            </Button>
+          </Link>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
+      <section className="flex-1 flex items-center justify-center px-6">
+        <div className="max-w-4xl w-full text-center space-y-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold shadow-md">
+          <Sparkles className="h-4 w-4" /> Powered by Greedy + Simulated Annealing Algorithm
+        </div>
+          <h2 className="!text-5xl md:!text-6xl !font-extrabold !text-gray-900 !leading-tight">
             Automated University Timetable Scheduling
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Optimize your academic scheduling with our intelligent timetable generation system.
-            Save time, reduce conflicts, and improve resource utilization.
+
+          <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+            Transform your academic scheduling with intelligent automation.
+            <span className="font-semibold text-gray-800"> Save time, eliminate conflicts,</span> and optimize resources.
           </p>
-          <div className="flex gap-4 justify-center">
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Link href="/login">
-              <Button size="lg" className="text-lg px-8">
-                Get Started
+              <Button
+                size="lg"
+                className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl hover:shadow-blue-500/50 transition-all hover:scale-105"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">
-          Key Features
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Intelligent Optimization
-            </h4>
-            <p className="text-gray-600">
-              Advanced algorithms generate optimal timetables while respecting all constraints
-              and preferences.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Conflict Resolution
-            </h4>
-            <p className="text-gray-600">
-              Automatically detect and resolve scheduling conflicts for rooms, instructors,
-              and student groups.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <Users className="h-6 w-6 text-purple-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Multi-Role Access
-            </h4>
-            <p className="text-gray-600">
-              Separate dashboards for administrators, faculty, and students with
-              role-specific features.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <BookOpen className="h-6 w-6 text-orange-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Course Management
-            </h4>
-            <p className="text-gray-600">
-              Comprehensive course catalog with departments, credits, and duration tracking.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-teal-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <Calendar className="h-6 w-6 text-teal-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Visual Schedules
-            </h4>
-            <p className="text-gray-600">
-              Interactive calendar views and detailed schedule listings for easy navigation.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-amber-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <Clock className="h-6 w-6 text-amber-600" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              Real-Time Updates
-            </h4>
-            <p className="text-gray-600">
-              Instant schedule updates and notifications when timetables are published.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-blue-600 rounded-2xl p-12 text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">
-            Ready to streamline your scheduling?
-          </h3>
-          <p className="text-xl text-blue-100 mb-8">
-            Sign in to access your personalized dashboard
-          </p>
-          <Link href="/login">
-            <Button size="lg" variant="secondary" className="text-lg px-8">
-              Sign In Now
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 shadow-md transition-all hover:scale-105"
+            >
+              Watch Demo
             </Button>
-          </Link>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto">
+            {[
+              { value: "99%", label: "Conflict Free" },
+              { value: "10x", label: "Faster Scheduling" },
+              { value: "24/7", label: "Automated" },
+            ].map((stat, idx) => (
+              <div key={idx} className="text-center space-y-1">
+                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2024 University Timetable Scheduler. All rights reserved.</p>
+      <footer className="bg-gray-900 text-gray-300 py-6">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg">
+              <Calendar className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-semibold text-white">TimeTable Scheduler</span>
+          </div>
+          <p className="text-sm">&copy; 2025 University Timetable Scheduler. All rights reserved.</p>
         </div>
       </footer>
     </main>
