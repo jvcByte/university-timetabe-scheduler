@@ -24,7 +24,6 @@ export function DashboardHeader({ userName, userRole, userEmail }: DashboardHead
 
   const handleLogout = async () => {
     await logout();
-    router.push("/login");
   };
 
   const getRoleLabel = (role: string) => {
