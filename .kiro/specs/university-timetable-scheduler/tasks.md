@@ -410,23 +410,23 @@
     - Add troubleshooting guide
     - _Requirements: 12.1, 12.2, 12.3_
 
-- [ ] 22. Implement testing
-  - [ ]* 22.1 Write unit tests for utilities
+- [x] 22. Implement testing
+  - [-] 22.1 Write unit tests for utilities
     - Test validation schemas
     - Test data transformation functions
     - Test constraint checking logic
     - _Requirements: 1.7, 5.6_
-  - [ ]* 22.2 Write integration tests
+  - [ ] 22.2 Write integration tests
     - Test Server Actions with test database
     - Test Prisma queries
     - Mock solver API calls
     - _Requirements: 4.1, 5.1_
-  - [ ]* 22.3 Write solver service tests
+  - [ ] 22.3 Write solver service tests
     - Test API endpoints with pytest
     - Test constraint validation
     - Test solver with small problem instances
     - _Requirements: 4.8, 5.2_
-  - [ ]* 22.4 Write E2E tests
+  - [ ] 22.4 Write E2E tests
     - Test admin login and course creation flow
     - Test timetable generation flow
     - Test manual editing and validation
@@ -434,31 +434,31 @@
     - Test role-based access control
     - _Requirements: 2.7, 4.1, 6.2, 7.3_
 
-- [ ]* 23. Add CI/CD pipeline
-  - [ ]* 23.1 Create GitHub Actions workflow
+- [ ] 23. Add CI/CD pipeline
+  - [ ] 23.1 Create GitHub Actions workflow
     - Set up Node.js and Python environments
     - Run linting and type checking
     - Run unit and integration tests
     - Build Docker images
     - _Requirements: 12.1, 12.2_
-  - [ ]* 23.2 Add deployment automation
+  - [ ] 23.2 Add deployment automation
     - Configure deployment to staging environment
     - Add manual approval for production
     - Set up environment secrets
     - _Requirements: 12.1, 12.2_
 
-- [ ]* 24. Performance optimization and documentation
-  - [ ]* 24.1 Optimize database queries
+- [ ] 24. Performance optimization and documentation
+  - [ ] 24.1 Optimize database queries
     - Add database indexes
     - Optimize Prisma includes and selects
     - Implement query result caching
     - _Requirements: 11.6_
-  - [ ]* 24.2 Optimize solver performance
+  - [ ] 24.2 Optimize solver performance
     - Tune CP-SAT solver parameters
     - Implement result caching for repeated problems
     - Add performance logging
     - _Requirements: 4.8_
-  - [ ]* 24.3 Create comprehensive documentation
+  - [ ] 24.3 Create comprehensive documentation
     - Write API documentation
     - Document solver algorithm
     - Create user guide

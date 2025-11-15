@@ -32,6 +32,11 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 - Python 3.11+
 - Docker and Docker Compose (for containerized deployment)
 
+## Documentation
+
+- **[Deployment Guide](DEPLOYMENT.md)** - Comprehensive Docker deployment instructions
+- **[Quick Reference](DOCKER_QUICK_REFERENCE.md)** - Common Docker commands and troubleshooting
+
 ## Getting Started
 
 ### Local Development
