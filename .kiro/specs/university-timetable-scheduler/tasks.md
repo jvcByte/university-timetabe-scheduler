@@ -369,7 +369,7 @@
     - Create student dashboard showing their schedule
     - _Requirements: 9.1_
 
-- [ ] 20. Add validation and error handling
+- [x] 20. Add validation and error handling
   - [x] 20.1 Create Zod validation schemas
     - Define schemas for all entity inputs
     - Add custom validation rules
