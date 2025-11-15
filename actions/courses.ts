@@ -3,6 +3,13 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  handleActionError,
+  success,
+  logError,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 // Validation schemas
 const courseSchema = z.object({
@@ -41,13 +48,6 @@ const courseSchema = z.object({
 const updateCourseSchema = courseSchema.extend({
   id: z.number().int(),
 });
-
-// Result types
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
 
 export type CourseInput = z.infer<typeof courseSchema>;
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
@@ -97,19 +97,10 @@ export async function createCourse(
     });
 
     revalidatePath("/admin/courses");
-    return { success: true, data: { id: course.id } };
+    return success({ id: course.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to create course:", error);
-    return {
-      success: false,
-      error: "Failed to create course. Please try again.",
-    };
+    logError("createCourse", error, { input });
+    return handleActionError(error);
   }
 }
 
@@ -127,12 +118,7 @@ export async function updateCourse(
       where: { id: validated.id },
     });
 
-    if (!existingCourse) {
-      return {
-        success: false,
-        error: "Course not found",
-      };
-    }
+    assertExists(existingCourse, "Course");
 
     // Check if code is being changed and if new code already exists
     if (validated.code !== existingCourse.code) {
@@ -195,19 +181,10 @@ export async function updateCourse(
 
     revalidatePath("/admin/courses");
     revalidatePath(`/admin/courses/${validated.id}`);
-    return { success: true, data: { id: validated.id } };
+    return success({ id: validated.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update course:", error);
-    return {
-      success: false,
-      error: "Failed to update course. Please try again.",
-    };
+    logError("updateCourse", error, { courseId: input.id });
+    return handleActionError(error);
   }
 }
 
@@ -230,12 +207,7 @@ export async function deleteCourse(
       },
     });
 
-    if (!course) {
-      return {
-        success: false,
-        error: "Course not found",
-      };
-    }
+    assertExists(course, "Course");
 
     // Check if course has assignments
     if (course._count.assignments > 0) {
@@ -251,12 +223,9 @@ export async function deleteCourse(
     });
 
     revalidatePath("/admin/courses");
-    return { success: true };
+    return success();
   } catch (error) {
-    console.error("Failed to delete course:", error);
-    return {
-      success: false,
-      error: "Failed to delete course. Please try again.",
-    };
+    logError("deleteCourse", error, { courseId: id });
+    return handleActionError(error);
   }
 }

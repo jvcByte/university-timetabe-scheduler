@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +18,7 @@ import {
 import { generateTimetable } from "@/actions/timetables";
 import { generateTimetableLocal } from "@/actions/local-timetables";
 import type { GenerateTimetableResult } from "@/actions/timetables";
-import { Loader2, CheckCircle, XCircle, AlertTriangle, Zap } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Zap } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface TimetableGenerationFormProps {
@@ -26,6 +29,31 @@ interface TimetableGenerationFormProps {
   }>;
 }
 
+const timetableGenerationSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Timetable name must be at least 3 characters")
+    .max(100, "Timetable name must be at most 100 characters"),
+  semester: z
+    .string()
+    .min(1, "Semester is required")
+    .max(50, "Semester must be at most 50 characters"),
+  academicYear: z
+    .string()
+    .min(4, "Academic year must be at least 4 characters")
+    .max(20, "Academic year must be at most 20 characters")
+    .regex(/^\d{4}(-\d{4})?$/, "Academic year must be in format YYYY or YYYY-YYYY"),
+  constraintConfigId: z.coerce.number().int().positive().optional(),
+  timeLimitSeconds: z.coerce
+    .number()
+    .int("Time limit must be an integer")
+    .min(10, "Time limit must be at least 10 seconds")
+    .max(1200, "Time limit must be at most 1200 seconds"),
+  useLocalSolver: z.boolean().default(true),
+});
+
+type TimetableGenerationFormData = z.infer<typeof timetableGenerationSchema>;
+
 export function TimetableGenerationForm({
   constraintConfigs,
 }: TimetableGenerationFormProps) {
@@ -33,33 +61,39 @@ export function TimetableGenerationForm({
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<GenerateTimetableResult | null>(null);
 
-  // Form state
-  const [name, setName] = useState("");
-  const [semester, setSemester] = useState("");
-  const [academicYear, setAcademicYear] = useState("");
-  const [constraintConfigId, setConstraintConfigId] = useState<string>(
-    constraintConfigs.find((c) => c.isDefault)?.id.toString() || ""
-  );
-  const [timeLimitSeconds, setTimeLimitSeconds] = useState("300");
-  const [useLocalSolver, setUseLocalSolver] = useState(true); // Default to local solver
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<TimetableGenerationFormData>({
+    resolver: zodResolver(timetableGenerationSchema),
+    mode: "onBlur",
+    defaultValues: {
+      constraintConfigId: constraintConfigs.find((c) => c.isDefault)?.id,
+      timeLimitSeconds: 600,
+      useLocalSolver: true,
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const constraintConfigId = watch("constraintConfigId");
+  const useLocalSolver = watch("useLocalSolver");
+
+  const onSubmit = async (data: TimetableGenerationFormData) => {
     setIsGenerating(true);
     setResult(null);
 
     try {
       const input = {
-        name,
-        semester,
-        academicYear,
-        constraintConfigId: constraintConfigId
-          ? parseInt(constraintConfigId)
-          : undefined,
-        timeLimitSeconds: parseInt(timeLimitSeconds),
+        name: data.name,
+        semester: data.semester,
+        academicYear: data.academicYear,
+        constraintConfigId: data.constraintConfigId,
+        timeLimitSeconds: data.timeLimitSeconds,
       };
 
-      const generationResult = useLocalSolver
+      const generationResult = data.useLocalSolver
         ? await generateTimetableLocal(input)
         : await generateTimetable(input);
 
@@ -84,55 +118,55 @@ export function TimetableGenerationForm({
     }
   };
 
-  const canSubmit =
-    !isGenerating && name.trim() && semester.trim() && academicYear.trim();
-
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="name">Timetable Name</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Timetable Name *</Label>
           <Input
             id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            {...register("name")}
             placeholder="e.g., Fall 2024 Schedule"
-            required
             disabled={isGenerating}
           />
+          {errors.name && (
+            <p className="text-sm text-red-600">{errors.name.message}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="semester">Semester</Label>
+          <div className="space-y-2">
+            <Label htmlFor="semester">Semester *</Label>
             <Input
               id="semester"
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
+              {...register("semester")}
               placeholder="e.g., Fall 2024"
-              required
               disabled={isGenerating}
             />
+            {errors.semester && (
+              <p className="text-sm text-red-600">{errors.semester.message}</p>
+            )}
           </div>
 
-          <div>
-            <Label htmlFor="academicYear">Academic Year</Label>
+          <div className="space-y-2">
+            <Label htmlFor="academicYear">Academic Year *</Label>
             <Input
               id="academicYear"
-              value={academicYear}
-              onChange={(e) => setAcademicYear(e.target.value)}
+              {...register("academicYear")}
               placeholder="e.g., 2024-2025"
-              required
               disabled={isGenerating}
             />
+            {errors.academicYear && (
+              <p className="text-sm text-red-600">{errors.academicYear.message}</p>
+            )}
           </div>
         </div>
 
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="constraintConfig">Constraint Configuration</Label>
           <Select
-            value={constraintConfigId}
-            onValueChange={setConstraintConfigId}
+            value={constraintConfigId?.toString()}
+            onValueChange={(value) => setValue("constraintConfigId", Number(value))}
             disabled={isGenerating}
           >
             <SelectTrigger id="constraintConfig">
@@ -146,21 +180,24 @@ export function TimetableGenerationForm({
               ))}
             </SelectContent>
           </Select>
+          {errors.constraintConfigId && (
+            <p className="text-sm text-red-600">{errors.constraintConfigId.message}</p>
+          )}
         </div>
 
-        <div>
-          <Label htmlFor="timeLimit">Time Limit (seconds)</Label>
+        <div className="space-y-2">
+          <Label htmlFor="timeLimitSeconds">Time Limit (seconds) *</Label>
           <Input
-            id="timeLimit"
+            id="timeLimitSeconds"
             type="number"
-            min="10"
-            max="600"
-            value={timeLimitSeconds}
-            onChange={(e) => setTimeLimitSeconds(e.target.value)}
+            {...register("timeLimitSeconds")}
             disabled={isGenerating}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Maximum time for the solver to find a solution (10-600 seconds)
+          {errors.timeLimitSeconds && (
+            <p className="text-sm text-red-600">{errors.timeLimitSeconds.message}</p>
+          )}
+          <p className="text-xs text-gray-500">
+            Maximum time for the solver to find a solution (10-1200 seconds)
           </p>
         </div>
 
@@ -168,7 +205,7 @@ export function TimetableGenerationForm({
           <div className="flex items-center gap-3">
             <Zap className={`h-5 w-5 ${useLocalSolver ? 'text-blue-600' : 'text-gray-400'}`} />
             <div>
-              <Label htmlFor="localSolver" className="text-sm font-medium cursor-pointer">
+              <Label htmlFor="useLocalSolver" className="text-sm font-medium cursor-pointer">
                 Use Fast Local Solver (Recommended)
               </Label>
               <p className="text-xs text-gray-600 mt-0.5">
@@ -179,14 +216,14 @@ export function TimetableGenerationForm({
             </div>
           </div>
           <Switch
-            id="localSolver"
+            id="useLocalSolver"
             checked={useLocalSolver}
-            onCheckedChange={setUseLocalSolver}
+            onCheckedChange={(checked) => setValue("useLocalSolver", checked)}
             disabled={isGenerating}
           />
         </div>
 
-        <Button type="submit" disabled={!canSubmit} className="w-full">
+        <Button type="submit" disabled={isGenerating} className="w-full">
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

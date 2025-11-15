@@ -3,6 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { solverClient, type Day } from "@/lib/solver-client";
+import {
+  handleSolverError,
+  logError,
+  logInfo,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 import type {
   GenerationPayload,
   CourseInput,
@@ -252,31 +259,15 @@ export async function generateTimetable(
       throw error;
     }
   } catch (error: any) {
-    console.error("Failed to generate timetable:", error);
+    logError("generateTimetable", error, { input });
 
-    // Provide user-friendly error messages
-    let errorMessage = "Failed to generate timetable";
-    let details: string | undefined;
-
-    if (error.name === "SolverTimeoutError") {
-      errorMessage = "Timetable generation timed out";
-      details =
-        "The solver took too long to find a solution. Try reducing the problem size or increasing the time limit.";
-    } else if (error.name === "SolverConnectionError") {
-      errorMessage = "Cannot connect to solver service";
-      details =
-        "The solver service is unavailable. Please check that it is running and try again.";
-    } else if (error.name === "SolverAPIError") {
-      errorMessage = "Solver service error";
-      details = error.message;
-    } else if (error.message) {
-      details = error.message;
-    }
+    // Handle solver-specific errors
+    const solverError = handleSolverError(error);
 
     return {
       success: false,
-      error: errorMessage,
-      details,
+      error: solverError.message,
+      details: solverError.details,
     };
   }
 }
@@ -285,20 +276,25 @@ export async function generateTimetable(
  * Get a timetable by ID with all assignments
  */
 export async function getTimetableById(id: number) {
-  return prisma.timetable.findUnique({
-    where: { id },
-    include: {
-      assignments: {
-        include: {
-          course: true,
-          instructor: true,
-          room: true,
-          group: true,
+  try {
+    return await prisma.timetable.findUnique({
+      where: { id },
+      include: {
+        assignments: {
+          include: {
+            course: true,
+            instructor: true,
+            room: true,
+            group: true,
+          },
+          orderBy: [{ day: "asc" }, { startTime: "asc" }],
         },
-        orderBy: [{ day: "asc" }, { startTime: "asc" }],
       },
-    },
-  });
+    });
+  } catch (error) {
+    logError("getTimetableById", error, { timetableId: id });
+    return null;
+  }
 }
 
 /**
@@ -312,42 +308,47 @@ export async function getTimetableByIdWithFilters(
     groupId?: number;
   }
 ) {
-  const where: any = { timetableId: id };
+  try {
+    const where: any = { timetableId: id };
 
-  if (filters?.roomId) {
-    where.roomId = filters.roomId;
-  }
-  if (filters?.instructorId) {
-    where.instructorId = filters.instructorId;
-  }
-  if (filters?.groupId) {
-    where.groupId = filters.groupId;
-  }
+    if (filters?.roomId) {
+      where.roomId = filters.roomId;
+    }
+    if (filters?.instructorId) {
+      where.instructorId = filters.instructorId;
+    }
+    if (filters?.groupId) {
+      where.groupId = filters.groupId;
+    }
 
-  const [timetable, assignments] = await Promise.all([
-    prisma.timetable.findUnique({
-      where: { id },
-    }),
-    prisma.assignment.findMany({
-      where,
-      include: {
-        course: true,
-        instructor: true,
-        room: true,
-        group: true,
-      },
-      orderBy: [{ day: "asc" }, { startTime: "asc" }],
-    }),
-  ]);
+    const [timetable, assignments] = await Promise.all([
+      prisma.timetable.findUnique({
+        where: { id },
+      }),
+      prisma.assignment.findMany({
+        where,
+        include: {
+          course: true,
+          instructor: true,
+          room: true,
+          group: true,
+        },
+        orderBy: [{ day: "asc" }, { startTime: "asc" }],
+      }),
+    ]);
 
-  if (!timetable) {
+    if (!timetable) {
+      return null;
+    }
+
+    return {
+      ...timetable,
+      assignments,
+    };
+  } catch (error) {
+    logError("getTimetableByIdWithFilters", error, { timetableId: id, filters });
     return null;
   }
-
-  return {
-    ...timetable,
-    assignments,
-  };
 }
 
 /**
@@ -359,77 +360,96 @@ export async function getTimetables(params: {
   status?: string;
   semester?: string;
 }) {
-  const { page = 1, pageSize = 10, status, semester } = params;
-  const skip = (page - 1) * pageSize;
+  try {
+    const { page = 1, pageSize = 10, status, semester } = params;
+    const skip = (page - 1) * pageSize;
 
-  const where: any = {};
-  if (status) {
-    where.status = status as any;
-  }
-  if (semester) {
-    where.semester = semester;
-  }
+    const where: any = {};
+    if (status) {
+      where.status = status as any;
+    }
+    if (semester) {
+      where.semester = semester;
+    }
 
-  const [timetables, total] = await Promise.all([
-    prisma.timetable.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: { assignments: true },
+    const [timetables, total] = await Promise.all([
+      prisma.timetable.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: {
+            select: { assignments: true },
+          },
         },
-      },
-    }),
-    prisma.timetable.count({ where }),
-  ]);
+      }),
+      prisma.timetable.count({ where }),
+    ]);
 
-  return {
-    timetables,
-    pagination: {
-      page,
-      pageSize,
-      total,
-      totalPages: Math.ceil(total / pageSize),
-    },
-  };
+    return {
+      timetables,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    logError("getTimetables", error, { params });
+    return {
+      timetables: [],
+      pagination: {
+        page: params.page || 1,
+        pageSize: params.pageSize || 10,
+        total: 0,
+        totalPages: 0,
+      },
+    };
+  }
 }
 
 /**
  * Get all unique semesters from timetables
  */
 export async function getTimetableSemesters() {
-  const timetables = await prisma.timetable.findMany({
-    select: {
-      semester: true,
-      academicYear: true,
-    },
-    distinct: ["semester", "academicYear"],
-    orderBy: [{ academicYear: "desc" }, { semester: "desc" }],
-  });
+  try {
+    const timetables = await prisma.timetable.findMany({
+      select: {
+        semester: true,
+        academicYear: true,
+      },
+      distinct: ["semester", "academicYear"],
+      orderBy: [{ academicYear: "desc" }, { semester: "desc" }],
+    });
 
-  return timetables.map((t) => ({
-    semester: t.semester,
-    academicYear: t.academicYear,
-    label: `${t.semester} ${t.academicYear}`,
-  }));
+    return timetables.map((t) => ({
+      semester: t.semester,
+      academicYear: t.academicYear,
+      label: `${t.semester} ${t.academicYear}`,
+    }));
+  } catch (error) {
+    logError("getTimetableSemesters", error);
+    return [];
+  }
 }
 
 /**
  * Delete a timetable
  */
-export async function deleteTimetable(id: number) {
+export async function deleteTimetable(id: number): Promise<ActionResult> {
   try {
     await prisma.timetable.delete({
       where: { id },
     });
 
     revalidatePath("/admin/timetables");
+    logInfo("deleteTimetable", "Timetable deleted successfully", { timetableId: id });
 
     return { success: true };
   } catch (error: any) {
-    console.error("Failed to delete timetable:", error);
+    logError("deleteTimetable", error, { timetableId: id });
     return {
       success: false,
       error: "Failed to delete timetable",
@@ -440,7 +460,7 @@ export async function deleteTimetable(id: number) {
 /**
  * Publish a timetable
  */
-export async function publishTimetable(id: number) {
+export async function publishTimetable(id: number): Promise<ActionResult<{ timetable: any }>> {
   try {
     const timetable = await prisma.timetable.update({
       where: { id },
@@ -452,10 +472,11 @@ export async function publishTimetable(id: number) {
 
     revalidatePath("/admin/timetables");
     revalidatePath(`/admin/timetables/${id}`);
+    logInfo("publishTimetable", "Timetable published successfully", { timetableId: id });
 
-    return { success: true, timetable };
+    return { success: true, data: { timetable } };
   } catch (error: any) {
-    console.error("Failed to publish timetable:", error);
+    logError("publishTimetable", error, { timetableId: id });
     return {
       success: false,
       error: "Failed to publish timetable",
@@ -466,7 +487,7 @@ export async function publishTimetable(id: number) {
 /**
  * Archive a timetable
  */
-export async function archiveTimetable(id: number) {
+export async function archiveTimetable(id: number): Promise<ActionResult<{ timetable: any }>> {
   try {
     const timetable = await prisma.timetable.update({
       where: { id },
@@ -477,10 +498,11 @@ export async function archiveTimetable(id: number) {
 
     revalidatePath("/admin/timetables");
     revalidatePath(`/admin/timetables/${id}`);
+    logInfo("archiveTimetable", "Timetable archived successfully", { timetableId: id });
 
-    return { success: true, timetable };
+    return { success: true, data: { timetable } };
   } catch (error: any) {
-    console.error("Failed to archive timetable:", error);
+    logError("archiveTimetable", error, { timetableId: id });
     return {
       success: false,
       error: "Failed to archive timetable",
@@ -511,12 +533,17 @@ export async function getPublishedTimetablesForFaculty(instructorId: number) {
       orderBy: { publishedAt: "desc" },
     });
 
+    logInfo("getPublishedTimetablesForFaculty", "Retrieved faculty timetables", {
+      instructorId,
+      count: timetables.length,
+    });
+
     return { success: true, timetables };
   } catch (error: any) {
-    console.error("Failed to get faculty timetables:", error);
+    logError("getPublishedTimetablesForFaculty", error, { instructorId });
     return {
       success: false,
-      error: "Failed to get timetables",
+      error: "Failed to retrieve timetables. Please try again later.",
       timetables: [],
     };
   }
@@ -545,12 +572,17 @@ export async function getPublishedTimetablesForStudent(groupId: number) {
       orderBy: { publishedAt: "desc" },
     });
 
+    logInfo("getPublishedTimetablesForStudent", "Retrieved student timetables", {
+      groupId,
+      count: timetables.length,
+    });
+
     return { success: true, timetables };
   } catch (error: any) {
-    console.error("Failed to get student timetables:", error);
+    logError("getPublishedTimetablesForStudent", error, { groupId });
     return {
       success: false,
-      error: "Failed to get timetables",
+      error: "Failed to retrieve timetables. Please try again later.",
       timetables: [],
     };
   }
@@ -586,19 +618,29 @@ export async function getPublishedTimetableForFaculty(
     });
 
     if (!timetable) {
+      logInfo("getPublishedTimetableForFaculty", "Timetable not found or not published", {
+        timetableId,
+        instructorId,
+      });
       return {
         success: false,
-        error: "Timetable not found or not published",
+        error: "Timetable not found or not published. It may have been removed or is not yet available.",
         timetable: null,
       };
     }
 
+    logInfo("getPublishedTimetableForFaculty", "Retrieved faculty timetable", {
+      timetableId,
+      instructorId,
+      assignmentCount: timetable.assignments.length,
+    });
+
     return { success: true, timetable };
   } catch (error: any) {
-    console.error("Failed to get faculty timetable:", error);
+    logError("getPublishedTimetableForFaculty", error, { timetableId, instructorId });
     return {
       success: false,
-      error: "Failed to get timetable",
+      error: "Failed to retrieve timetable. Please try again later.",
       timetable: null,
     };
   }
@@ -634,19 +676,29 @@ export async function getPublishedTimetableForStudent(
     });
 
     if (!timetable) {
+      logInfo("getPublishedTimetableForStudent", "Timetable not found or not published", {
+        timetableId,
+        groupId,
+      });
       return {
         success: false,
-        error: "Timetable not found or not published",
+        error: "Timetable not found or not published. It may have been removed or is not yet available.",
         timetable: null,
       };
     }
 
+    logInfo("getPublishedTimetableForStudent", "Retrieved student timetable", {
+      timetableId,
+      groupId,
+      assignmentCount: timetable.assignments.length,
+    });
+
     return { success: true, timetable };
   } catch (error: any) {
-    console.error("Failed to get student timetable:", error);
+    logError("getPublishedTimetableForStudent", error, { timetableId, groupId });
     return {
       success: false,
-      error: "Failed to get timetable",
+      error: "Failed to retrieve timetable. Please try again later.",
       timetable: null,
     };
   }
@@ -656,38 +708,47 @@ export async function getPublishedTimetableForStudent(
  * Get filter options for a timetable (rooms, instructors, groups used in assignments)
  */
 export async function getTimetableFilterOptions(timetableId: number) {
-  const assignments = await prisma.assignment.findMany({
-    where: { timetableId },
-    select: {
-      room: { select: { id: true, name: true, building: true } },
-      instructor: { select: { id: true, name: true } },
-      group: { select: { id: true, name: true } },
-    },
-    distinct: ["roomId", "instructorId", "groupId"],
-  });
+  try {
+    const assignments = await prisma.assignment.findMany({
+      where: { timetableId },
+      select: {
+        room: { select: { id: true, name: true, building: true } },
+        instructor: { select: { id: true, name: true } },
+        group: { select: { id: true, name: true } },
+      },
+      distinct: ["roomId", "instructorId", "groupId"],
+    });
 
-  // Extract unique values
-  const roomsMap = new Map();
-  const instructorsMap = new Map();
-  const groupsMap = new Map();
+    // Extract unique values
+    const roomsMap = new Map();
+    const instructorsMap = new Map();
+    const groupsMap = new Map();
 
-  assignments.forEach((assignment) => {
-    roomsMap.set(assignment.room.id, assignment.room);
-    instructorsMap.set(assignment.instructor.id, assignment.instructor);
-    groupsMap.set(assignment.group.id, assignment.group);
-  });
+    assignments.forEach((assignment) => {
+      roomsMap.set(assignment.room.id, assignment.room);
+      instructorsMap.set(assignment.instructor.id, assignment.instructor);
+      groupsMap.set(assignment.group.id, assignment.group);
+    });
 
-  return {
-    rooms: Array.from(roomsMap.values()).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    ),
-    instructors: Array.from(instructorsMap.values()).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    ),
-    groups: Array.from(groupsMap.values()).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    ),
-  };
+    return {
+      rooms: Array.from(roomsMap.values()).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+      instructors: Array.from(instructorsMap.values()).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+      groups: Array.from(groupsMap.values()).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    };
+  } catch (error) {
+    logError("getTimetableFilterOptions", error, { timetableId });
+    return {
+      rooms: [],
+      instructors: [],
+      groups: [],
+    };
+  }
 }
 
 /**
@@ -920,12 +981,7 @@ export async function updateAssignment(
       include: { course: true },
     });
 
-    if (!assignment) {
-      return {
-        success: false,
-        error: "Assignment not found",
-      };
-    }
+    assertExists(assignment, "Assignment");
 
     // Calculate end time if only start time is provided
     let finalEndTime = endTime;
@@ -968,12 +1024,13 @@ export async function updateAssignment(
 
     // Revalidate the timetable page
     revalidatePath(`/admin/timetables/${assignment.timetableId}`);
+    logInfo("updateAssignment", "Assignment updated successfully", { assignmentId: input.assignmentId });
 
     return {
       success: true,
     };
   } catch (error: any) {
-    console.error("Failed to update assignment:", error);
+    logError("updateAssignment", error, { input });
     return {
       success: false,
       error: "Failed to update assignment",

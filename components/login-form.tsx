@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/actions/auth";
+import { loginSchema, type LoginInput } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,18 +15,24 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+  });
+
+  const onSubmit = async (data: LoginInput) => {
     setError("");
     setIsLoading(true);
 
     try {
-      const result = await login(email, password);
+      const result = await login(data.email, data.password);
 
       if (result.success) {
         router.push(callbackUrl);
@@ -39,7 +48,7 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && (
         <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
@@ -52,11 +61,12 @@ export function LoginForm() {
           id="email"
           type="email"
           placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register("email")}
           disabled={isLoading}
         />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -65,11 +75,12 @@ export function LoginForm() {
           id="password"
           type="password"
           placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          {...register("password")}
           disabled={isLoading}
         />
+        {errors.password && (
+          <p className="text-sm text-red-600">{errors.password.message}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>

@@ -3,6 +3,13 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  handleActionError,
+  success,
+  logError,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 // Validation schemas
 const availabilitySchema = z.record(
@@ -41,13 +48,6 @@ const instructorSchema = z.object({
 const updateInstructorSchema = instructorSchema.extend({
   id: z.number().int(),
 });
-
-// Result types
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
 
 export type InstructorInput = z.infer<typeof instructorSchema>;
 export type UpdateInstructorInput = z.infer<typeof updateInstructorSchema>;
@@ -116,19 +116,10 @@ export async function createInstructor(
     });
 
     revalidatePath("/admin/instructors");
-    return { success: true, data: { id: instructor.id } };
+    return success({ id: instructor.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to create instructor:", error);
-    return {
-      success: false,
-      error: "Failed to create instructor. Please try again.",
-    };
+    logError("createInstructor", error, { input });
+    return handleActionError(error);
   }
 }
 
@@ -146,12 +137,7 @@ export async function updateInstructor(
       where: { id: validated.id },
     });
 
-    if (!existingInstructor) {
-      return {
-        success: false,
-        error: "Instructor not found",
-      };
-    }
+    assertExists(existingInstructor, "Instructor");
 
     // Check if email is being changed and if new email already exists
     if (validated.email !== existingInstructor.email) {
@@ -214,19 +200,10 @@ export async function updateInstructor(
 
     revalidatePath("/admin/instructors");
     revalidatePath(`/admin/instructors/${validated.id}`);
-    return { success: true, data: { id: validated.id } };
+    return success({ id: validated.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update instructor:", error);
-    return {
-      success: false,
-      error: "Failed to update instructor. Please try again.",
-    };
+    logError("updateInstructor", error, { instructorId: input.id });
+    return handleActionError(error);
   }
 }
 
@@ -250,12 +227,7 @@ export async function deleteInstructor(
       },
     });
 
-    if (!instructor) {
-      return {
-        success: false,
-        error: "Instructor not found",
-      };
-    }
+    assertExists(instructor, "Instructor");
 
     // Check if instructor has assignments
     if (instructor._count.assignments > 0) {
@@ -279,13 +251,10 @@ export async function deleteInstructor(
     });
 
     revalidatePath("/admin/instructors");
-    return { success: true };
+    return success();
   } catch (error) {
-    console.error("Failed to delete instructor:", error);
-    return {
-      success: false,
-      error: "Failed to delete instructor. Please try again.",
-    };
+    logError("deleteInstructor", error, { instructorId: id });
+    return handleActionError(error);
   }
 }
 
@@ -312,12 +281,7 @@ export async function updateInstructorAvailability(
       where: { id: instructorId },
     });
 
-    if (!instructor) {
-      return {
-        success: false,
-        error: "Instructor not found",
-      };
-    }
+    assertExists(instructor, "Instructor");
 
     // Update instructor availability and preferences
     await prisma.instructor.update({
@@ -332,18 +296,9 @@ export async function updateInstructorAvailability(
     revalidatePath("/faculty/availability");
     revalidatePath(`/admin/instructors/${instructorId}`);
     
-    return { success: true };
+    return success();
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update instructor availability:", error);
-    return {
-      success: false,
-      error: "Failed to update availability. Please try again.",
-    };
+    logError("updateInstructorAvailability", error, { instructorId });
+    return handleActionError(error);
   }
 }

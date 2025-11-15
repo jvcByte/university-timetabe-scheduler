@@ -9,6 +9,13 @@ import {
   setDefaultConstraintConfig as setDefaultConstraintConfigLib,
   getConstraintConfigById,
 } from "@/lib/constraints";
+import {
+  handleActionError,
+  success,
+  logError,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 // Validation schemas
 const timeSchema = z
@@ -84,13 +91,6 @@ const updateConstraintConfigSchema = z.object({
     path: ["workingHoursEnd"],
   }
 );
-
-// Result types
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
 
 export type ConstraintConfigInput = z.infer<typeof constraintConfigSchema>;
 export type UpdateConstraintConfigInput = z.infer<typeof updateConstraintConfigSchema>;
@@ -170,19 +170,10 @@ export async function createConstraintConfig(
     const config = await createConstraintConfigLib(validated);
     
     revalidatePath("/admin/constraints");
-    return { success: true, data: { id: config.id } };
+    return success({ id: config.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to create constraint configuration:", error);
-    return {
-      success: false,
-      error: "Failed to create constraint configuration. Please try again.",
-    };
+    logError("createConstraintConfig", error, { input });
+    return handleActionError(error);
   }
 }
 
@@ -197,12 +188,7 @@ export async function updateConstraintConfig(
     
     // Check if constraint config exists
     const existingConfig = await getConstraintConfigById(validated.id);
-    if (!existingConfig) {
-      return {
-        success: false,
-        error: "Constraint configuration not found",
-      };
-    }
+    assertExists(existingConfig, "Constraint configuration");
     
     // Merge with existing data for validation
     const mergedData = {
@@ -228,19 +214,10 @@ export async function updateConstraintConfig(
     
     revalidatePath("/admin/constraints");
     revalidatePath(`/admin/constraints/${id}`);
-    return { success: true, data: { id: config.id } };
+    return success({ id: config.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update constraint configuration:", error);
-    return {
-      success: false,
-      error: "Failed to update constraint configuration. Please try again.",
-    };
+    logError("updateConstraintConfig", error, { configId: input.id });
+    return handleActionError(error);
   }
 }
 
@@ -254,19 +231,10 @@ export async function deleteConstraintConfig(
     await deleteConstraintConfigLib(id);
     
     revalidatePath("/admin/constraints");
-    return { success: true };
+    return success();
   } catch (error) {
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-    console.error("Failed to delete constraint configuration:", error);
-    return {
-      success: false,
-      error: "Failed to delete constraint configuration. Please try again.",
-    };
+    logError("deleteConstraintConfig", error, { configId: id });
+    return handleActionError(error);
   }
 }
 
@@ -279,22 +247,14 @@ export async function setDefaultConstraintConfig(
   try {
     // Check if constraint config exists
     const existingConfig = await getConstraintConfigById(id);
-    if (!existingConfig) {
-      return {
-        success: false,
-        error: "Constraint configuration not found",
-      };
-    }
+    assertExists(existingConfig, "Constraint configuration");
     
     const config = await setDefaultConstraintConfigLib(id);
     
     revalidatePath("/admin/constraints");
-    return { success: true, data: { id: config.id } };
+    return success({ id: config.id });
   } catch (error) {
-    console.error("Failed to set default constraint configuration:", error);
-    return {
-      success: false,
-      error: "Failed to set default constraint configuration. Please try again.",
-    };
+    logError("setDefaultConstraintConfig", error, { configId: id });
+    return handleActionError(error);
   }
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { updateInstructorAvailability } from "@/actions/instructors";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { validateTimeSlot } from "@/lib/validation";
 
 interface AvailabilityFormProps {
   instructorId: number;
@@ -26,6 +27,7 @@ export function AvailabilityForm({
     preferredTimes?: string[];
   }>(initialPreferences || {});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string>("");
   const { toast } = useToast();
 
   const handleChange = (
@@ -34,10 +36,32 @@ export function AvailabilityForm({
   ) => {
     setAvailability(newAvailability);
     setPreferences(newPreferences);
+    setValidationError("");
+  };
+
+  const validateAvailability = (): boolean => {
+    // Validate all time slots
+    for (const [day, slots] of Object.entries(availability)) {
+      for (const slot of slots) {
+        const validation = validateTimeSlot(slot);
+        if (!validation.valid) {
+          setValidationError(`Invalid time slot on ${day}: ${validation.error}`);
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError("");
+
+    // Validate before submitting
+    if (!validateAvailability()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -73,6 +97,12 @@ export function AvailabilityForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {validationError && (
+        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+          {validationError}
+        </div>
+      )}
+
       <AvailabilityEditor
         availability={availability}
         preferences={preferences}
@@ -86,6 +116,7 @@ export function AvailabilityForm({
           onClick={() => {
             setAvailability(initialAvailability || {});
             setPreferences(initialPreferences || {});
+            setValidationError("");
           }}
           disabled={isSubmitting}
         >

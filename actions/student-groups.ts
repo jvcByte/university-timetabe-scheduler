@@ -3,6 +3,13 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  handleActionError,
+  success,
+  logError,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 // Validation schemas
 const studentGroupSchema = z.object({
@@ -36,13 +43,6 @@ const studentGroupSchema = z.object({
 const updateStudentGroupSchema = studentGroupSchema.extend({
   id: z.number().int(),
 });
-
-// Result types
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
 
 export type StudentGroupInput = z.infer<typeof studentGroupSchema>;
 export type UpdateStudentGroupInput = z.infer<typeof updateStudentGroupSchema>;
@@ -115,19 +115,10 @@ export async function createStudentGroup(
     });
 
     revalidatePath("/admin/groups");
-    return { success: true, data: { id: studentGroup.id } };
+    return success({ id: studentGroup.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to create student group:", error);
-    return {
-      success: false,
-      error: "Failed to create student group. Please try again.",
-    };
+    logError("createStudentGroup", error, { input });
+    return handleActionError(error);
   }
 }
 
@@ -145,12 +136,7 @@ export async function updateStudentGroup(
       where: { id: validated.id },
     });
 
-    if (!existingGroup) {
-      return {
-        success: false,
-        error: "Student group not found",
-      };
-    }
+    assertExists(existingGroup, "Student group");
 
     // Check if name is being changed and if new name already exists
     if (validated.name !== existingGroup.name) {
@@ -229,19 +215,10 @@ export async function updateStudentGroup(
 
     revalidatePath("/admin/groups");
     revalidatePath(`/admin/groups/${validated.id}`);
-    return { success: true, data: { id: validated.id } };
+    return success({ id: validated.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update student group:", error);
-    return {
-      success: false,
-      error: "Failed to update student group. Please try again.",
-    };
+    logError("updateStudentGroup", error, { groupId: input.id });
+    return handleActionError(error);
   }
 }
 
@@ -265,12 +242,7 @@ export async function deleteStudentGroup(
       },
     });
 
-    if (!studentGroup) {
-      return {
-        success: false,
-        error: "Student group not found",
-      };
-    }
+    assertExists(studentGroup, "Student group");
 
     // Check if student group has assignments
     if (studentGroup._count.assignments > 0) {
@@ -286,12 +258,9 @@ export async function deleteStudentGroup(
     });
 
     revalidatePath("/admin/groups");
-    return { success: true };
+    return success();
   } catch (error) {
-    console.error("Failed to delete student group:", error);
-    return {
-      success: false,
-      error: "Failed to delete student group. Please try again.",
-    };
+    logError("deleteStudentGroup", error, { groupId: id });
+    return handleActionError(error);
   }
 }

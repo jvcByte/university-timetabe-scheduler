@@ -3,6 +3,13 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  handleActionError,
+  success,
+  logError,
+  assertExists,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 // Validation schemas
 const roomSchema = z.object({
@@ -29,13 +36,6 @@ const roomSchema = z.object({
 const updateRoomSchema = roomSchema.extend({
   id: z.number().int(),
 });
-
-// Result types
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
 
 export type RoomInput = z.infer<typeof roomSchema>;
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
@@ -73,19 +73,10 @@ export async function createRoom(
     });
 
     revalidatePath("/admin/rooms");
-    return { success: true, data: { id: room.id } };
+    return success({ id: room.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to create room:", error);
-    return {
-      success: false,
-      error: "Failed to create room. Please try again.",
-    };
+    logError("createRoom", error, { input });
+    return handleActionError(error);
   }
 }
 
@@ -103,12 +94,7 @@ export async function updateRoom(
       where: { id: validated.id },
     });
 
-    if (!existingRoom) {
-      return {
-        success: false,
-        error: "Room not found",
-      };
-    }
+    assertExists(existingRoom, "Room");
 
     // Check if name is being changed and if new name already exists
     if (validated.name !== existingRoom.name) {
@@ -138,19 +124,10 @@ export async function updateRoom(
 
     revalidatePath("/admin/rooms");
     revalidatePath(`/admin/rooms/${validated.id}`);
-    return { success: true, data: { id: validated.id } };
+    return success({ id: validated.id });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.errors[0].message,
-      };
-    }
-    console.error("Failed to update room:", error);
-    return {
-      success: false,
-      error: "Failed to update room. Please try again.",
-    };
+    logError("updateRoom", error, { roomId: input.id });
+    return handleActionError(error);
   }
 }
 
@@ -171,12 +148,7 @@ export async function deleteRoom(id: number): Promise<ActionResult> {
       },
     });
 
-    if (!room) {
-      return {
-        success: false,
-        error: "Room not found",
-      };
-    }
+    assertExists(room, "Room");
 
     // Check if room has assignments
     if (room._count.assignments > 0) {
@@ -192,12 +164,9 @@ export async function deleteRoom(id: number): Promise<ActionResult> {
     });
 
     revalidatePath("/admin/rooms");
-    return { success: true };
+    return success();
   } catch (error) {
-    console.error("Failed to delete room:", error);
-    return {
-      success: false,
-      error: "Failed to delete room. Please try again.",
-    };
+    logError("deleteRoom", error, { roomId: id });
+    return handleActionError(error);
   }
 }

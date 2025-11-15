@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { TimetableDetailView } from "@/components/timetable-detail-view";
 import { Button } from "@/components/ui/button";
 import { TimetableExportButton } from "@/components/timetable-export-button";
+import { TimetablePublishButton } from "@/components/timetable-publish-button";
 
 interface TimetableDetailPageProps {
   params: Promise<{
@@ -61,17 +62,6 @@ export default async function TimetableDetailPage({
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <TimetableExportButton
-                timetableId={timetableId}
-                timetableName={timetable.name}
-                filterOptions={filterOptions}
-              />
-              <Link href={`/admin/timetables/${timetableId}/edit`}>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Timetable
-                </Button>
-              </Link>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
                   timetable.status === "PUBLISHED"
@@ -83,6 +73,22 @@ export default async function TimetableDetailPage({
               >
                 {timetable.status}
               </span>
+              <TimetablePublishButton
+                timetableId={timetableId}
+                currentStatus={timetable.status}
+                timetableName={timetable.name}
+              />
+              <TimetableExportButton
+                timetableId={timetableId}
+                timetableName={timetable.name}
+                filterOptions={filterOptions}
+              />
+              <Link href={`/admin/timetables/${timetableId}/edit`}>
+                <Button variant="outline" size="sm">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Timetable
+                </Button>
+              </Link>
             </div>
           </div>
 

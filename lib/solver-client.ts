@@ -1,4 +1,5 @@
 import { env } from "./env";
+import { logError, logWarning, logInfo } from "./error-handling";
 
 // Types matching Python Pydantic models
 export type Day =
@@ -271,14 +272,18 @@ class SolverClient {
 
         if (shouldRetry) {
           const delay = calculateBackoffDelay(attempt, this.retryOptions);
-          console.warn(
-            `Solver API request failed (attempt ${attempt + 1}/${
-              this.retryOptions.maxRetries + 1
-            }). Retrying in ${delay}ms...`,
-            lastError.message
-          );
+          logWarning("SolverClient", `Request failed, retrying in ${delay}ms`, {
+            attempt: attempt + 1,
+            maxAttempts: this.retryOptions.maxRetries + 1,
+            error: lastError.message,
+            endpoint,
+          });
           await sleep(delay);
         } else {
+          logError("SolverClient", lastError, {
+            endpoint,
+            attempts: attempt + 1,
+          });
           throw lastError;
         }
       }

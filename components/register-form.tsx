@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { register } from "@/actions/auth";
+import { registerSchema, type RegisterInput } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,23 +19,31 @@ import {
 
 export function RegisterForm() {
   const router = useRouter();
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "STUDENT" as "ADMIN" | "FACULTY" | "STUDENT",
-  });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register: registerField,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur",
+    defaultValues: {
+      role: "STUDENT",
+    },
+  });
+
+  const role = watch("role");
+
+  const onSubmit = async (data: RegisterInput) => {
     setError("");
     setIsLoading(true);
 
     try {
-      const result = await register(formData);
+      const result = await register(data);
 
       if (result.success) {
         router.push("/login?registered=true");
@@ -47,7 +58,7 @@ export function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && (
         <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
@@ -60,11 +71,12 @@ export function RegisterForm() {
           id="name"
           type="text"
           placeholder="John Doe"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
+          {...registerField("name")}
           disabled={isLoading}
         />
+        {errors.name && (
+          <p className="text-sm text-red-600">{errors.name.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -73,11 +85,12 @@ export function RegisterForm() {
           id="email"
           type="email"
           placeholder="you@example.com"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
+          {...registerField("email")}
           disabled={isLoading}
         />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -86,24 +99,20 @@ export function RegisterForm() {
           id="password"
           type="password"
           placeholder="••••••••"
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          required
+          {...registerField("password")}
           disabled={isLoading}
         />
+        {errors.password && (
+          <p className="text-sm text-red-600">{errors.password.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
         <Select
-          value={formData.role}
+          value={role}
           onValueChange={(value) =>
-            setFormData({
-              ...formData,
-              role: value as "ADMIN" | "FACULTY" | "STUDENT",
-            })
+            setValue("role", value as "ADMIN" | "FACULTY" | "STUDENT")
           }
           disabled={isLoading}
         >
@@ -116,6 +125,9 @@ export function RegisterForm() {
             <SelectItem value="ADMIN">Administrator</SelectItem>
           </SelectContent>
         </Select>
+        {errors.role && (
+          <p className="text-sm text-red-600">{errors.role.message}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>

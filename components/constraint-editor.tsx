@@ -16,6 +16,7 @@ import {
 import { updateConstraintConfig } from "@/actions/constraints";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Info } from "lucide-react";
+import { validateWorkingHours } from "@/lib/validation";
 
 interface ConstraintConfig {
   id: number;
@@ -101,6 +102,7 @@ const SOFT_CONSTRAINTS = [
 
 export function ConstraintEditor({ config, onSuccess }: ConstraintEditorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string>("");
   const { toast } = useToast();
   const router = useRouter();
 
@@ -146,6 +148,18 @@ export function ConstraintEditor({ config, onSuccess }: ConstraintEditorProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError("");
+
+    // Validate working hours
+    const workingHoursValidation = validateWorkingHours(
+      workingHours.start,
+      workingHours.end
+    );
+    if (!workingHoursValidation.valid) {
+      setValidationError(workingHoursValidation.error || "Invalid working hours");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -188,6 +202,12 @@ export function ConstraintEditor({ config, onSuccess }: ConstraintEditorProps) {
   return (
     <TooltipProvider>
       <form onSubmit={handleSubmit} className="space-y-8">
+        {validationError && (
+          <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+            {validationError}
+          </div>
+        )}
+
         {/* Hard Constraints Section */}
         <div className="space-y-4">
           <div>

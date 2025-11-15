@@ -15,12 +15,11 @@ import {
   type ImportValidationError,
 } from "@/lib/import-export";
 import { z } from "zod";
-
-export type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
+import {
+  logError,
+  logInfo,
+  type ActionResult,
+} from "@/lib/error-handling";
 
 export interface ImportActionResult {
   success: boolean;
@@ -134,6 +133,7 @@ export async function importCourses(
     }
 
     revalidatePath("/admin/courses");
+    logInfo("importCourses", `Imported ${imported} courses`, { imported, errorCount: errors.length });
 
     return {
       success: imported > 0,
@@ -144,7 +144,7 @@ export async function importCourses(
       message: `Successfully imported ${imported} course(s)${errors.length > 0 ? `, ${errors.length} error(s)` : ""}`,
     };
   } catch (error) {
-    console.error("Import courses error:", error);
+    logError("importCourses", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to import courses",
@@ -260,6 +260,7 @@ export async function importInstructors(
     }
 
     revalidatePath("/admin/instructors");
+    logInfo("importInstructors", `Imported ${imported} instructors`, { imported, errorCount: errors.length });
 
     return {
       success: imported > 0,
@@ -270,7 +271,7 @@ export async function importInstructors(
       message: `Successfully imported ${imported} instructor(s)${errors.length > 0 ? `, ${errors.length} error(s)` : ""}`,
     };
   } catch (error) {
-    console.error("Import instructors error:", error);
+    logError("importInstructors", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to import instructors",
@@ -368,6 +369,7 @@ export async function importRooms(
     }
 
     revalidatePath("/admin/rooms");
+    logInfo("importRooms", `Imported ${imported} rooms`, { imported, errorCount: errors.length });
 
     return {
       success: imported > 0,
@@ -378,7 +380,7 @@ export async function importRooms(
       message: `Successfully imported ${imported} room(s)${errors.length > 0 ? `, ${errors.length} error(s)` : ""}`,
     };
   } catch (error) {
-    console.error("Import rooms error:", error);
+    logError("importRooms", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to import rooms",
@@ -471,6 +473,7 @@ export async function importStudentGroups(
     }
 
     revalidatePath("/admin/groups");
+    logInfo("importStudentGroups", `Imported ${imported} student groups`, { imported, errorCount: errors.length });
 
     return {
       success: imported > 0,
@@ -481,7 +484,7 @@ export async function importStudentGroups(
       message: `Successfully imported ${imported} student group(s)${errors.length > 0 ? `, ${errors.length} error(s)` : ""}`,
     };
   } catch (error) {
-    console.error("Import student groups error:", error);
+    logError("importStudentGroups", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to import student groups",
@@ -509,7 +512,7 @@ export async function exportCoursesCSV(): Promise<ActionResult<string>> {
       data: csv,
     };
   } catch (error) {
-    console.error("Export courses CSV error:", error);
+    logError("exportCoursesCSV", error);
     return {
       success: false,
       error: "Failed to export courses",
@@ -538,7 +541,7 @@ export async function exportCoursesExcel(): Promise<ActionResult<string>> {
       data: base64,
     };
   } catch (error) {
-    console.error("Export courses Excel error:", error);
+    logError("exportCoursesExcel", error);
     return {
       success: false,
       error: "Failed to export courses",
@@ -566,7 +569,7 @@ export async function exportInstructorsCSV(): Promise<ActionResult<string>> {
       data: csv,
     };
   } catch (error) {
-    console.error("Export instructors CSV error:", error);
+    logError("exportInstructorsCSV", error);
     return {
       success: false,
       error: "Failed to export instructors",
@@ -595,7 +598,7 @@ export async function exportInstructorsExcel(): Promise<ActionResult<string>> {
       data: base64,
     };
   } catch (error) {
-    console.error("Export instructors Excel error:", error);
+    logError("exportInstructorsExcel", error);
     return {
       success: false,
       error: "Failed to export instructors",
@@ -620,7 +623,7 @@ export async function exportRoomsCSV(): Promise<ActionResult<string>> {
       data: csv,
     };
   } catch (error) {
-    console.error("Export rooms CSV error:", error);
+    logError("exportRoomsCSV", error);
     return {
       success: false,
       error: "Failed to export rooms",
@@ -646,7 +649,7 @@ export async function exportRoomsExcel(): Promise<ActionResult<string>> {
       data: base64,
     };
   } catch (error) {
-    console.error("Export rooms Excel error:", error);
+    logError("exportRoomsExcel", error);
     return {
       success: false,
       error: "Failed to export rooms",
@@ -671,7 +674,7 @@ export async function exportStudentGroupsCSV(): Promise<ActionResult<string>> {
       data: csv,
     };
   } catch (error) {
-    console.error("Export student groups CSV error:", error);
+    logError("exportStudentGroupsCSV", error);
     return {
       success: false,
       error: "Failed to export student groups",
@@ -697,7 +700,7 @@ export async function exportStudentGroupsExcel(): Promise<ActionResult<string>> 
       data: base64,
     };
   } catch (error) {
-    console.error("Export student groups Excel error:", error);
+    logError("exportStudentGroupsExcel", error);
     return {
       success: false,
       error: "Failed to export student groups",

@@ -2,6 +2,11 @@
 
 import { prisma } from "@/lib/db";
 import { getTimetableByIdWithFilters } from "./timetables";
+import {
+  logError,
+  logInfo,
+  assertExists,
+} from "@/lib/error-handling";
 
 export interface ExportFilters {
   roomId?: number;
@@ -21,14 +26,23 @@ export interface ExportTimetableResult {
 export async function getTimetableExportData(
   timetableId: number,
   filters?: ExportFilters
-) {
+): Promise<ExportTimetableResult> {
   try {
+    // Fetch timetable with filters
     const timetable = await getTimetableByIdWithFilters(timetableId, filters);
 
     if (!timetable) {
       return {
         success: false,
-        error: "Timetable not found",
+        error: "Timetable not found. It may have been deleted.",
+      };
+    }
+
+    // Check if timetable has assignments
+    if (!timetable.assignments || timetable.assignments.length === 0) {
+      return {
+        success: false,
+        error: "Timetable has no assignments to export. Please generate a timetable first.",
       };
     }
 
@@ -73,15 +87,22 @@ export async function getTimetableExportData(
       })),
     };
 
+    logInfo("getTimetableExportData", "Timetable data prepared for export", {
+      timetableId,
+      assignmentCount: exportData.assignments.length,
+      filters,
+    });
+
     return {
       success: true,
       data: exportData,
     };
-  } catch (error: any) {
-    console.error("Failed to get timetable export data:", error);
+  } catch (error) {
+    logError("getTimetableExportData", error, { timetableId, filters });
+    
     return {
       success: false,
-      error: "Failed to get timetable data",
+      error: "Failed to prepare timetable data for export. Please try again.",
     };
   }
 }
@@ -89,38 +110,72 @@ export async function getTimetableExportData(
 /**
  * Get filter labels for export
  */
-export async function getExportFilterLabels(filters?: ExportFilters) {
-  const labels: string[] = [];
+export async function getExportFilterLabels(
+  filters?: ExportFilters
+): Promise<string[]> {
+  try {
+    const labels: string[] = [];
 
-  if (filters?.roomId) {
-    const room = await prisma.room.findUnique({
-      where: { id: filters.roomId },
-      select: { name: true, building: true },
-    });
-    if (room) {
-      labels.push(`Room: ${room.name} (${room.building})`);
+    // Fetch room label
+    if (filters?.roomId) {
+      try {
+        const room = await prisma.room.findUnique({
+          where: { id: filters.roomId },
+          select: { name: true, building: true },
+        });
+        
+        if (room) {
+          labels.push(`Room: ${room.name} (${room.building})`);
+        }
+      } catch (error) {
+        logError("getExportFilterLabels", error, { 
+          filter: "room", 
+          roomId: filters.roomId 
+        });
+      }
     }
-  }
 
-  if (filters?.instructorId) {
-    const instructor = await prisma.instructor.findUnique({
-      where: { id: filters.instructorId },
-      select: { name: true },
-    });
-    if (instructor) {
-      labels.push(`Instructor: ${instructor.name}`);
+    // Fetch instructor label
+    if (filters?.instructorId) {
+      try {
+        const instructor = await prisma.instructor.findUnique({
+          where: { id: filters.instructorId },
+          select: { name: true },
+        });
+        
+        if (instructor) {
+          labels.push(`Instructor: ${instructor.name}`);
+        }
+      } catch (error) {
+        logError("getExportFilterLabels", error, { 
+          filter: "instructor", 
+          instructorId: filters.instructorId 
+        });
+      }
     }
-  }
 
-  if (filters?.groupId) {
-    const group = await prisma.studentGroup.findUnique({
-      where: { id: filters.groupId },
-      select: { name: true },
-    });
-    if (group) {
-      labels.push(`Group: ${group.name}`);
+    // Fetch group label
+    if (filters?.groupId) {
+      try {
+        const group = await prisma.studentGroup.findUnique({
+          where: { id: filters.groupId },
+          select: { name: true },
+        });
+        
+        if (group) {
+          labels.push(`Group: ${group.name}`);
+        }
+      } catch (error) {
+        logError("getExportFilterLabels", error, { 
+          filter: "group", 
+          groupId: filters.groupId 
+        });
+      }
     }
-  }
 
-  return labels;
+    return labels;
+  } catch (error) {
+    logError("getExportFilterLabels", error, { filters });
+    return [];
+  }
 }

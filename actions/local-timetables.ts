@@ -12,6 +12,13 @@ import type {
   Day,
 } from "@/lib/solver-client";
 import { getDefaultConstraintConfig } from "@/lib/constraints";
+import {
+  logError,
+  logInfo,
+  assertExists,
+  AppError,
+  ErrorCode,
+} from "@/lib/error-handling";
 
 export interface GenerateTimetableInput {
   name: string;
@@ -93,11 +100,44 @@ export async function generateTimetableLocal(
             : getDefaultConstraintConfig(),
         ]);
 
-      if (!constraintConfig) {
-        throw new Error("Constraint configuration not found");
+      assertExists(constraintConfig, "Constraint configuration");
+
+      // Validate that we have sufficient data
+      if (courses.length === 0) {
+        throw new AppError(
+          "No courses found. Please add courses before generating a timetable.",
+          ErrorCode.INVALID_STATE,
+          400
+        );
+      }
+      if (instructors.length === 0) {
+        throw new AppError(
+          "No instructors found. Please add instructors before generating a timetable.",
+          ErrorCode.INVALID_STATE,
+          400
+        );
+      }
+      if (rooms.length === 0) {
+        throw new AppError(
+          "No rooms found. Please add rooms before generating a timetable.",
+          ErrorCode.INVALID_STATE,
+          400
+        );
+      }
+      if (groups.length === 0) {
+        throw new AppError(
+          "No student groups found. Please add student groups before generating a timetable.",
+          ErrorCode.INVALID_STATE,
+          400
+        );
       }
 
-      console.log(`Loaded ${courses.length} courses, ${instructors.length} instructors, ${rooms.length} rooms, ${groups.length} groups`);
+      logInfo("generateTimetableLocal", "Loaded data for timetable generation", {
+        courseCount: courses.length,
+        instructorCount: instructors.length,
+        roomCount: rooms.length,
+        groupCount: groups.length,
+      });
 
       // 3. Format data for solver
       const courseInputs: CourseInput[] = courses.map((course) => {
@@ -169,7 +209,7 @@ export async function generateTimetableLocal(
       };
 
       // 4. Run local solver
-      console.log('Starting local solver...');
+      logInfo("generateTimetableLocal", "Starting local solver");
       const solver = new TimetableSolver(
         courseInputs,
         instructorInputs,
@@ -181,9 +221,12 @@ export async function generateTimetableLocal(
       const result = await solver.solve(input.timeLimitSeconds || 300);
       
       const solveTimeSeconds = (Date.now() - startTime) / 1000;
-      console.log(`Solver completed in ${solveTimeSeconds.toFixed(2)}s`);
-      console.log(`Generated ${result.assignments.length} assignments with fitness ${result.fitness.toFixed(2)}`);
-      console.log(`Found ${result.violations.length} violations`);
+      logInfo("generateTimetableLocal", "Solver completed", {
+        solveTimeSeconds: solveTimeSeconds.toFixed(2),
+        assignmentCount: result.assignments.length,
+        fitness: result.fitness.toFixed(2),
+        violationCount: result.violations.length,
+      });
 
       // 5. Store assignments in database
       if (result.assignments.length > 0) {
@@ -225,6 +268,12 @@ export async function generateTimetableLocal(
       revalidatePath("/admin/timetables");
       revalidatePath(`/admin/timetables/${timetable.id}`);
 
+      logInfo("generateTimetableLocal", "Timetable generated successfully", {
+        timetableId: timetable.id,
+        assignmentCount: result.assignments.length,
+        fitnessScore: result.fitness,
+      });
+
       return {
         success: true,
         timetableId: timetable.id,
@@ -235,22 +284,66 @@ export async function generateTimetableLocal(
       };
     } catch (error: any) {
       // Update timetable status to DRAFT on error
-      await prisma.timetable.update({
-        where: { id: timetable.id },
-        data: {
-          status: "DRAFT",
-        },
-      });
+      try {
+        await prisma.timetable.update({
+          where: { id: timetable.id },
+          data: {
+            status: "DRAFT",
+          },
+        });
+      } catch (updateError) {
+        logError("generateTimetableLocal", updateError, {
+          context: "Failed to update timetable status to DRAFT",
+          timetableId: timetable.id,
+        });
+      }
 
       throw error;
     }
   } catch (error: any) {
-    console.error("Failed to generate timetable:", error);
+    logError("generateTimetableLocal", error, { input });
+
+    // Provide user-friendly error messages based on error type
+    if (error instanceof AppError) {
+      return {
+        success: false,
+        error: error.message,
+        details: error.details?.message,
+      };
+    }
+
+    // Handle specific error patterns
+    let errorMessage = "Failed to generate timetable";
+    let errorDetails = error.message;
+
+    if (error.message?.includes("Constraint configuration not found")) {
+      errorMessage = "Configuration Error";
+      errorDetails = "Constraint configuration not found. Please ensure a default configuration exists.";
+    } else if (error.message?.includes("No courses found")) {
+      errorMessage = "Missing Data";
+      errorDetails = error.message;
+    } else if (error.message?.includes("No instructors found")) {
+      errorMessage = "Missing Data";
+      errorDetails = error.message;
+    } else if (error.message?.includes("No rooms found")) {
+      errorMessage = "Missing Data";
+      errorDetails = error.message;
+    } else if (error.message?.includes("No student groups found")) {
+      errorMessage = "Missing Data";
+      errorDetails = error.message;
+    } else if (error.name === "PrismaClientKnownRequestError") {
+      errorMessage = "Database Error";
+      errorDetails = "Failed to access database. Please try again later.";
+    } else if (error.message) {
+      errorDetails = error.message;
+    } else {
+      errorDetails = "An unexpected error occurred. Please try again.";
+    }
 
     return {
       success: false,
-      error: "Failed to generate timetable",
-      details: error.message,
+      error: errorMessage,
+      details: errorDetails,
     };
   }
 }
