@@ -5,7 +5,6 @@ import { getStudentDashboardData } from "@/lib/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, BookOpen, GraduationCap, MapPin } from "lucide-react";
-import { DashboardHeader } from "@/components/dashboard-header";
 
 export default async function StudentDashboard() {
   const session = await requireStudent();
@@ -58,13 +57,7 @@ export default async function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader 
-        userName={session.user.name || "Student"} 
-        userRole="STUDENT"
-        userEmail={session.user.email || undefined}
-      />
-      <div className="p-8">
+    <div className="p-8">
 
       {/* Quick Stats */}
       {studentGroup && (
@@ -319,7 +312,6 @@ export default async function StudentDashboard() {
             </div>
           )}
         </div>
-      </div>
       </div>
     </div>
   );

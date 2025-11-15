@@ -4,72 +4,36 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  BookOpen,
-  Users,
-  Building,
   Calendar,
-  Settings,
-  GraduationCap,
-  UsersRound,
-  BarChart3,
-  FileText,
+  Clock,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   {
     name: "Dashboard",
-    href: "/admin",
+    href: "/faculty",
     icon: LayoutDashboard,
   },
   {
-    name: "Timetables",
-    href: "/admin/timetables",
+    name: "My Schedule",
+    href: "/faculty/schedule",
     icon: Calendar,
   },
   {
-    name: "Courses",
-    href: "/admin/courses",
-    icon: BookOpen,
+    name: "Availability",
+    href: "/faculty/availability",
+    icon: Clock,
   },
   {
-    name: "Instructors",
-    href: "/admin/instructors",
-    icon: Users,
-  },
-  {
-    name: "Rooms",
-    href: "/admin/rooms",
-    icon: Building,
-  },
-  {
-    name: "Students",
-    href: "/admin/students",
-    icon: GraduationCap,
-  },
-  {
-    name: "Student Groups",
-    href: "/admin/groups",
-    icon: UsersRound,
-  },
-  {
-    name: "Departments",
-    href: "/admin/departments",
-    icon: FileText,
-  },
-  {
-    name: "Constraints",
-    href: "/admin/constraints",
-    icon: Settings,
-  },
-  {
-    name: "Analytics",
-    href: "/admin/analytics",
-    icon: BarChart3,
+    name: "Profile",
+    href: "/faculty/profile",
+    icon: User,
   },
 ];
 
-export function AdminSidebar() {
+export function FacultySidebar() {
   const pathname = usePathname();
 
   return (
