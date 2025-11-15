@@ -387,30 +387,30 @@
     - Implement real-time validation
     - _Requirements: 1.7_
 
-- [ ] 21. Implement Docker deployment
-  - [ ] 21.1 Create web application Dockerfile
+- [x] 21. Implement Docker deployment
+  - [x] 21.1 Create web application Dockerfile
     - Write multi-stage Dockerfile for Next.js
     - Include Prisma generation step
     - Optimize image size
     - _Requirements: 12.1, 12.5_
-  - [ ] 21.2 Create solver service Dockerfile
+  - [x] 21.2 Create solver service Dockerfile
     - Write Dockerfile for Python FastAPI app
     - Install OR-Tools and dependencies
     - Configure uvicorn server
     - _Requirements: 12.2, 12.6_
-  - [ ] 21.3 Create Docker Compose configuration
+  - [x] 21.3 Create Docker Compose configuration
     - Define web and solver services
     - Configure networking between services
     - Set up SQLite volume for persistence
     - Define environment variables
     - _Requirements: 12.3, 12.4, 12.7_
-  - [ ] 21.4 Add deployment documentation
+  - [x] 21.4 Add deployment documentation
     - Write README with setup instructions
     - Document environment variables
     - Add troubleshooting guide
     - _Requirements: 12.1, 12.2, 12.3_
 
-- [ ]* 22. Implement testing
+- [ ] 22. Implement testing
   - [ ]* 22.1 Write unit tests for utilities
     - Test validation schemas
     - Test data transformation functions
