@@ -125,11 +125,11 @@ export function generateTimetableExcel(
       assignment.room.name,
       assignment.room.building,
       assignment.room.type,
-      assignment.room.capacity,
+      assignment.room.capacity.toString(),
       assignment.group.name,
       assignment.group.program,
-      assignment.group.year,
-      assignment.group.size,
+      assignment.group.year.toString(),
+      assignment.group.size.toString(),
     ]);
   });
 
