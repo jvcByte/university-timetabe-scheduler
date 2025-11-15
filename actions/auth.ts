@@ -27,6 +27,7 @@ const registerSchema = z.object({
 export type LoginResult = {
   success: boolean;
   error?: string;
+  role?: "ADMIN" | "FACULTY" | "STUDENT";
 };
 
 export type RegisterResult = {
@@ -53,6 +54,12 @@ export async function login(
       };
     }
 
+    // Get user to check role
+    const user = await prisma.user.findUnique({
+      where: { email: validatedFields.data.email },
+      select: { role: true },
+    });
+
     // Attempt sign in
     await signIn("credentials", {
       email: validatedFields.data.email,
@@ -61,7 +68,7 @@ export async function login(
     });
 
     logInfo("login", "User logged in successfully", { email });
-    return { success: true };
+    return { success: true, role: user?.role };
   } catch (error) {
     // Handle authentication errors
     if (error instanceof AuthError) {

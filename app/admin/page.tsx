@@ -18,6 +18,7 @@ import {
   getTimetableStatusOverview, 
   getRecentTimetables 
 } from "@/lib/dashboard";
+import { DashboardHeader } from "@/components/dashboard-header";
 
 export default async function AdminDashboard() {
   const session = await requireAdmin();
@@ -28,11 +29,13 @@ export default async function AdminDashboard() {
   const recentTimetables = await getRecentTimetables(5);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold mb-4 text-gray-900">Admin Dashboard</h1>
-      <p className="text-gray-600 mb-6">
-        Welcome, {session.user.name}!
-      </p>
+    <div className="min-h-screen bg-gray-50">
+      <DashboardHeader 
+        userName={session.user.name || "Admin"} 
+        userRole="ADMIN"
+        userEmail={session.user.email || undefined}
+      />
+      <div className="p-8">
 
       {/* Entity Count Stats */}
       <div className="mb-8">
@@ -281,6 +284,7 @@ export default async function AdminDashboard() {
             </div>
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );

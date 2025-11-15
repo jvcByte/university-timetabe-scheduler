@@ -35,7 +35,22 @@ export function LoginForm() {
       const result = await login(data.email, data.password);
 
       if (result.success) {
-        router.push(callbackUrl);
+        // Redirect based on user role if no callback URL
+        let redirectUrl = callbackUrl;
+        if (callbackUrl === "/" && result.role) {
+          switch (result.role) {
+            case "ADMIN":
+              redirectUrl = "/admin";
+              break;
+            case "FACULTY":
+              redirectUrl = "/faculty";
+              break;
+            case "STUDENT":
+              redirectUrl = "/student";
+              break;
+          }
+        }
+        router.push(redirectUrl);
         router.refresh();
       } else {
         setError(result.error || "Login failed");

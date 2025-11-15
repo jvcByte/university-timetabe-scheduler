@@ -4,7 +4,8 @@ import { getPublishedTimetablesForStudent } from "@/actions/timetables";
 import { getStudentDashboardData } from "@/lib/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, BookOpen, GraduationCap, MapPin, Clock } from "lucide-react";
+import { Calendar, Users, BookOpen, GraduationCap, MapPin } from "lucide-react";
+import { DashboardHeader } from "@/components/dashboard-header";
 
 export default async function StudentDashboard() {
   const session = await requireStudent();
@@ -57,9 +58,13 @@ export default async function StudentDashboard() {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Student Dashboard</h1>
-      <p className="text-gray-600 mb-6">Welcome, {session.user.name}!</p>
+    <div className="min-h-screen bg-gray-50">
+      <DashboardHeader 
+        userName={session.user.name || "Student"} 
+        userRole="STUDENT"
+        userEmail={session.user.email || undefined}
+      />
+      <div className="p-8">
 
       {/* Quick Stats */}
       {studentGroup && (
@@ -314,6 +319,7 @@ export default async function StudentDashboard() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

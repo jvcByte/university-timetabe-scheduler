@@ -5,6 +5,7 @@ import { getFacultyDashboardData } from "@/lib/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, BookOpen, TrendingUp, Users, MapPin } from "lucide-react";
+import { DashboardHeader } from "@/components/dashboard-header";
 
 export default async function FacultyDashboard() {
   const session = await requireFaculty();
@@ -46,11 +47,13 @@ export default async function FacultyDashboard() {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Faculty Dashboard</h1>
-      <p className="text-gray-600 mb-6">
-        Welcome, {session.user.name}!
-      </p>
+    <div className="min-h-screen bg-gray-50">
+      <DashboardHeader 
+        userName={session.user.name || "Faculty"} 
+        userRole="FACULTY"
+        userEmail={session.user.email || undefined}
+      />
+      <div className="p-8">
 
       {/* Quick Stats */}
       {instructor && dashboardData && (
@@ -281,6 +284,7 @@ export default async function FacultyDashboard() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
