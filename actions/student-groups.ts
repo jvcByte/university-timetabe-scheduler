@@ -68,35 +68,6 @@ export async function createStudentGroup(
       };
     }
 
-    // If userId is provided, check if it exists and is not already linked
-    if (validated.userId) {
-      const user = await prisma.user.findUnique({
-        where: { id: validated.userId },
-        include: { studentGroup: true },
-      });
-
-      if (!user) {
-        return {
-          success: false,
-          error: "User not found",
-        };
-      }
-
-      if (user.studentGroup) {
-        return {
-          success: false,
-          error: "User is already linked to another student group",
-        };
-      }
-
-      if (user.role !== "STUDENT") {
-        return {
-          success: false,
-          error: "User must have STUDENT role to be linked to a student group",
-        };
-      }
-    }
-
     // Create student group with course associations
     const studentGroup = await prisma.studentGroup.create({
       data: {
@@ -105,7 +76,6 @@ export async function createStudentGroup(
         year: validated.year,
         semester: validated.semester,
         size: validated.size,
-        userId: validated.userId || null,
         courses: {
           create: validated.courseIds.map((courseId) => ({
             courseId,
@@ -152,37 +122,6 @@ export async function updateStudentGroup(
       }
     }
 
-    // If userId is being changed, validate it
-    if (validated.userId !== existingGroup.userId) {
-      if (validated.userId) {
-        const user = await prisma.user.findUnique({
-          where: { id: validated.userId },
-          include: { studentGroup: true },
-        });
-
-        if (!user) {
-          return {
-            success: false,
-            error: "User not found",
-          };
-        }
-
-        if (user.studentGroup && user.studentGroup.id !== validated.id) {
-          return {
-            success: false,
-            error: "User is already linked to another student group",
-          };
-        }
-
-        if (user.role !== "STUDENT") {
-          return {
-            success: false,
-            error: "User must have STUDENT role to be linked to a student group",
-          };
-        }
-      }
-    }
-
     // Update student group with course associations
     await prisma.$transaction(async (tx) => {
       // Update student group basic fields
@@ -194,7 +133,6 @@ export async function updateStudentGroup(
           year: validated.year,
           semester: validated.semester,
           size: validated.size,
-          userId: validated.userId || null,
         },
       });
 

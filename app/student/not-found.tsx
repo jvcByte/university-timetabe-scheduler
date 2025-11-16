@@ -15,7 +15,7 @@ export default function StudentNotFound() {
             Student Page Not Found
           </h2>
           <p className="text-gray-600">
-            The student page you're looking for doesn't exist.
+            The student page you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
 

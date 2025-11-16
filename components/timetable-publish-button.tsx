@@ -117,7 +117,7 @@ export function TimetablePublishButton({
           <AlertDialogHeader>
             <AlertDialogTitle>Publish Timetable</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to publish "{timetableName}"? Once published,
+              Are you sure you want to publish &quot;{timetableName}&quot;? Once published,
               this timetable will be visible to all faculty members and students.
               You can still edit it after publishing.
             </AlertDialogDescription>
@@ -156,7 +156,7 @@ export function TimetablePublishButton({
           <AlertDialogHeader>
             <AlertDialogTitle>Archive Timetable</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to archive "{timetableName}"? Archived
+              Are you sure you want to archive &quot;{timetableName}&quot;? Archived
               timetables will no longer be visible to faculty and students, but
               can be restored later if needed.
             </AlertDialogDescription>

@@ -52,7 +52,6 @@ interface StudentFormProps {
     studentId: string;
     name: string;
     email: string;
-    program: string | null;
     year: number | null;
     semester: number | null;
     departmentId: number | null;
@@ -64,6 +63,12 @@ interface StudentFormProps {
     group?: {
       id: number;
       name: string;
+    } | null;
+    user?: {
+      id: string;
+      email: string;
+      name: string;
+      role: string;
     } | null;
   };
   departments: Array<{

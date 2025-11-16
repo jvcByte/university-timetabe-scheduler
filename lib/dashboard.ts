@@ -322,7 +322,7 @@ export async function getStudentDashboardData(userId: string) {
       studentId: student.studentId,
       name: student.name,
       email: student.email,
-      program: student.program,
+      program: studentGroup.program, // Program comes from the student group
       year: student.year,
       semester: student.semester,
     },

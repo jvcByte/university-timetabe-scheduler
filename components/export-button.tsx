@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { ActionResult } from "@/actions/import-export";
+import type { ActionResult } from "@/lib/error-handling";
 
 interface ExportButtonProps {
   entityType: "courses" | "instructors" | "rooms" | "studentGroups";

@@ -411,22 +411,22 @@
     - _Requirements: 12.1, 12.2, 12.3_
 
 - [x] 22. Implement testing
-  - [-] 22.1 Write unit tests for utilities
+  - [x] 22.1 Write unit tests for utilities
     - Test validation schemas
     - Test data transformation functions
     - Test constraint checking logic
     - _Requirements: 1.7, 5.6_
-  - [ ] 22.2 Write integration tests
+  - [x] 22.2 Write integration tests
     - Test Server Actions with test database
     - Test Prisma queries
     - Mock solver API calls
     - _Requirements: 4.1, 5.1_
-  - [ ] 22.3 Write solver service tests
+  - [x] 22.3 Write solver service tests
     - Test API endpoints with pytest
     - Test constraint validation
     - Test solver with small problem instances
     - _Requirements: 4.8, 5.2_
-  - [ ] 22.4 Write E2E tests
+  - [x] 22.4 Write E2E tests
     - Test admin login and course creation flow
     - Test timetable generation flow
     - Test manual editing and validation
