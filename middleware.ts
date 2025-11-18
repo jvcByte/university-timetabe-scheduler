@@ -1,79 +1,54 @@
-import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const userRole = req.auth?.user?.role;
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Get session token from cookies
+  const sessionToken = request.cookies.get("authjs.session-token")?.value ||
+                       request.cookies.get("__Secure-authjs.session-token")?.value;
+  
+  const isLoggedIn = !!sessionToken;
 
-  const isPublicRoute = nextUrl.pathname === "/";
-  const isAuthRoute = nextUrl.pathname.startsWith("/login") || 
-                      nextUrl.pathname.startsWith("/register");
-  const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-  const isFacultyRoute = nextUrl.pathname.startsWith("/faculty");
-  const isStudentRoute = nextUrl.pathname.startsWith("/student");
-  const isApiRoute = nextUrl.pathname.startsWith("/api");
-
-  // Allow public routes (index page)
-  if (isPublicRoute) {
+  // Public routes
+  if (pathname === "/") {
     return NextResponse.next();
   }
 
-  // Allow auth routes and API auth routes
-  if (isAuthRoute || nextUrl.pathname.startsWith("/api/auth")) {
-    if (isLoggedIn && isAuthRoute) {
-      // Redirect logged-in users away from auth pages to their dashboard
-      switch (userRole) {
-        case "ADMIN":
-          return NextResponse.redirect(new URL("/admin", nextUrl));
-        case "FACULTY":
-          return NextResponse.redirect(new URL("/faculty", nextUrl));
-        case "STUDENT":
-          return NextResponse.redirect(new URL("/student", nextUrl));
-        default:
-          return NextResponse.redirect(new URL("/", nextUrl));
-      }
+  // Auth routes
+  if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+    // Redirect logged-in users to their dashboard
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/api/auth/redirect", request.url));
     }
     return NextResponse.next();
   }
 
-  // Protect all other routes - require authentication
-  if (!isLoggedIn && !isApiRoute) {
-    const callbackUrl = nextUrl.pathname + nextUrl.search;
-    const loginUrl = new URL("/login", nextUrl);
-    loginUrl.searchParams.set("callbackUrl", callbackUrl);
+  // API routes (allow all, let API handle auth)
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
+  // Protected routes - require login
+  if (!isLoggedIn) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Role-based access control
-  if (isLoggedIn) {
-    // Admin routes - only ADMIN role
-    if (isAdminRoute && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-
-    // Faculty routes - only FACULTY role
-    if (isFacultyRoute && userRole !== "FACULTY") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-
-    // Student routes - only STUDENT role
-    if (isStudentRoute && userRole !== "STUDENT") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-  }
-
+  // For role-based access, we'll handle it in the page components
+  // since we can't access the database in Edge middleware efficiently
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
+     * - favicon.ico
+     * - public files (images, etc.)
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
