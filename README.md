@@ -14,11 +14,12 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 ## Technology Stack
 
 ### Web Application
-- Next.js 16 with App Router
+- Next.js 15 with App Router
 - TypeScript
 - Tailwind CSS + shadcn/ui
-- Prisma ORM with SQLite
-- NextAuth.js for authentication
+- Prisma ORM with PostgreSQL (Neon)
+- NextAuth.js v5 for authentication
+- TanStack Query for data fetching
 
 ### Solver Service
 - Python 3.11+
@@ -30,12 +31,36 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 
 - Node.js 18+ and pnpm
 - Python 3.11+
-- Docker and Docker Compose (for containerized deployment)
+- PostgreSQL database (Neon recommended for production)
+- Docker and Docker Compose (optional, for containerized deployment)
+
+## Quick Start
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Set up environment
+cp .env.example .env
+# Edit .env with your database URL
+
+# 3. Initialize database
+pnpm run db:push
+pnpm run db:seed
+
+# 4. Start development server
+pnpm run dev
+```
+
+Visit http://localhost:3000 and login with:
+- **Admin:** admin@university.edu / admin123
 
 ## Documentation
 
-- **[Deployment Guide](DEPLOYMENT.md)** - Comprehensive Docker deployment instructions
-- **[Quick Reference](DOCKER_QUICK_REFERENCE.md)** - Common Docker commands and troubleshooting
+- **[Neon Import Guide](NEON_IMPORT_INSTRUCTIONS.md)** - Migrate SQLite data to PostgreSQL
+- **[Import Summary](IMPORT_SUMMARY.md)** - Quick reference for data migration
+- **[Deployment Guide](DEPLOYMENT.md)** - Docker deployment instructions (if available)
+- **[Ready to Import](READY_TO_IMPORT.md)** - Final checklist before importing
 
 ## Getting Started
 
@@ -59,12 +84,24 @@ Update the values in `.env` as needed.
 
 #### 3. Initialize Database
 
-Generate Prisma client and create the database:
+Generate Prisma client and push schema to database:
 
 ```bash
 pnpm run db:generate
 pnpm run db:push
 ```
+
+Seed the database with sample data:
+
+```bash
+pnpm run db:seed
+```
+
+**Default Login Credentials:**
+- Admin: `admin@university.edu` / `admin123`
+- Faculty: `john.smith@university.edu` / `faculty123`
+
+⚠️ Change these passwords after first login!
 
 #### 4. Install Solver Service Dependencies
 
@@ -136,27 +173,50 @@ docker-compose down -v
 
 ```
 .
-├── app/                    # Next.js app directory
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
-├── components/            # React components
-├── lib/                   # Utility functions
-│   ├── db.ts             # Prisma client
-│   ├── env.ts            # Environment validation
-│   └── utils.ts          # Helper functions
-├── prisma/               # Database schema and migrations
-│   └── schema.prisma     # Prisma schema
-├── solver/               # Python solver service
+├── app/                           # Next.js app directory
+│   ├── (auth)/                   # Authentication routes
+│   ├── admin/                    # Admin dashboard
+│   ├── faculty/                  # Faculty dashboard
+│   ├── student/                  # Student dashboard
+│   ├── api/                      # API routes
+│   ├── globals.css              # Global styles
+│   ├── layout.tsx               # Root layout
+│   └── page.tsx                 # Landing page
+├── components/                   # React components
+│   ├── ui/                      # shadcn/ui components
+│   ├── dashboard-header.tsx     # Dashboard navigation
+│   ├── data-table.tsx           # Reusable data table
+│   └── ...                      # Feature components
+├── lib/                         # Utility functions
+│   ├── db.ts                    # Prisma client
+│   ├── auth.ts                  # NextAuth configuration
+│   ├── utils.ts                 # Helper functions
+│   └── validations/             # Zod schemas
+├── prisma/                      # Database
+│   ├── schema.prisma            # Prisma schema (PostgreSQL)
+│   ├── seed.ts                  # Database seeding
+│   └── dev.db                   # SQLite (local dev only)
+├── scripts/                     # Utility scripts
+│   ├── export-sqlite-data.ts    # Export SQLite to JSON
+│   ├── generate-sql-import.ts   # Generate PostgreSQL SQL
+│   ├── import-to-neon.ts        # Direct Prisma import
+│   └── copy-sql.sh              # Copy SQL to clipboard
+├── solver/                      # Python solver service
 │   ├── app/
-│   │   ├── main.py      # FastAPI application
-│   │   ├── config.py    # Configuration
-│   │   └── models/      # Pydantic models
+│   │   ├── main.py             # FastAPI application
+│   │   ├── config.py           # Configuration
+│   │   ├── models/             # Pydantic models
+│   │   └── solver/             # OR-Tools solver
 │   ├── requirements.txt
 │   └── Dockerfile
-├── docker-compose.yml    # Docker Compose configuration
-├── Dockerfile           # Web app Dockerfile
-└── package.json         # Node.js dependencies
+├── tests/                       # Test files
+│   ├── unit/                   # Unit tests
+│   └── e2e/                    # Playwright tests
+├── docker-compose.yml           # Docker Compose configuration
+├── Dockerfile                   # Web app Dockerfile
+├── package.json                 # Node.js dependencies
+├── NEON_IMPORT_INSTRUCTIONS.md  # Database migration guide
+└── README.md                    # This file
 ```
 
 ## Available Scripts
@@ -167,9 +227,18 @@ docker-compose down -v
 - `pnpm run build` - Build for production
 - `pnpm run start` - Start production server
 - `pnpm run lint` - Run ESLint
+- `pnpm run test` - Run unit tests
+- `pnpm run test:e2e` - Run end-to-end tests
+
+### Database Management
+
 - `pnpm run db:generate` - Generate Prisma client
 - `pnpm run db:push` - Push schema to database
 - `pnpm run db:migrate` - Run database migrations
+- `pnpm run db:seed` - Seed database with sample data
+- `pnpm run db:export` - Export SQLite data to JSON
+- `pnpm run db:generate-sql` - Generate SQL import script for PostgreSQL
+- `pnpm run db:migrate-to-neon` - Export and generate SQL for Neon migration
 
 ### Solver Service
 
@@ -180,7 +249,9 @@ docker-compose down -v
 
 ### Web Application (.env)
 
-- `DATABASE_URL` - Database connection string (default: `file:./dev.db` for SQLite)
+- `DATABASE_URL` - PostgreSQL connection string (e.g., `postgresql://user:password@host:5432/dbname`)
+  - For Neon: `postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
+  - For local dev with SQLite: `file:./prisma/dev.db`
 - `NEXTAUTH_SECRET` - Secret for NextAuth.js (generate with `openssl rand -base64 32`)
 - `NEXTAUTH_URL` - Application URL (e.g., `http://localhost:3000`)
 - `SOLVER_API_URL` - Solver service URL (e.g., `http://localhost:8000` or `http://solver:8000` in Docker)
@@ -190,6 +261,108 @@ docker-compose down -v
 
 - `API_KEY` - API key for authentication (must match `SOLVER_API_KEY` in web app)
 - `LOG_LEVEL` - Logging level (DEBUG, INFO, WARNING, ERROR)
+
+## Database Migration
+
+### Migrating from SQLite to PostgreSQL (Neon)
+
+If you have existing data in SQLite and want to migrate to PostgreSQL:
+
+#### 1. Export Data from SQLite
+
+```bash
+pnpm run db:export
+```
+
+This creates JSON files in the `data-export/` directory with all your data.
+
+#### 2. Generate SQL Import Script
+
+```bash
+pnpm run db:generate-sql
+```
+
+This creates `neon-import.sql` with all INSERT statements ready for PostgreSQL.
+
+#### 3. Import to Neon
+
+**Option A - Using Neon SQL Editor (Recommended):**
+1. Go to https://console.neon.tech
+2. Open SQL Editor
+3. Copy contents of `neon-import.sql`
+4. Paste and run
+
+**Option B - Using psql:**
+```bash
+psql "your-neon-connection-string" -f neon-import.sql
+```
+
+#### 4. Update Environment Variables
+
+Update your `.env` file with the Neon connection string:
+
+```bash
+DATABASE_URL="postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require"
+```
+
+#### Quick Migration Command
+
+To export and generate SQL in one step:
+
+```bash
+pnpm run db:migrate-to-neon
+```
+
+See [NEON_IMPORT_INSTRUCTIONS.md](NEON_IMPORT_INSTRUCTIONS.md) for detailed instructions.
+
+## Production Deployment
+
+### Deploying to Vercel
+
+1. **Set up Neon Database**
+   - Create account at https://neon.tech
+   - Create new project
+   - Copy connection string
+
+2. **Configure Environment Variables in Vercel**
+   ```
+   DATABASE_URL=postgresql://...
+   NEXTAUTH_SECRET=<generate-with-openssl>
+   NEXTAUTH_URL=https://your-app.vercel.app
+   SOLVER_API_URL=https://your-solver-service-url
+   SOLVER_API_KEY=<generate-with-openssl>
+   ```
+
+3. **Deploy Solver Service**
+   - Deploy to Railway, Render, or similar
+   - Set `API_KEY` environment variable
+   - Note the deployed URL
+
+4. **Push Database Schema**
+   ```bash
+   pnpm prisma db push
+   ```
+
+5. **Import Data** (if migrating)
+   - Follow the Database Migration steps above
+   - Or run seed: `pnpm run db:seed`
+
+6. **Deploy to Vercel**
+   ```bash
+   vercel --prod
+   ```
+
+### Environment Setup for Production
+
+Generate secure secrets:
+
+```bash
+# For NEXTAUTH_SECRET
+openssl rand -base64 32
+
+# For SOLVER_API_KEY
+openssl rand -base64 32
+```
 
 ## Docker Deployment Details
 
@@ -266,16 +439,16 @@ docker-compose exec web wget -O- http://solver:8000/api/v1/health
 
 ### Database Issues
 
-**Problem**: Database is locked or corrupted
+**Problem**: Cannot connect to Neon database
 
-**Solution**: Stop all services and reset the database:
+**Solution**: Verify connection string and network access:
 
 ```bash
-docker-compose down
-docker volume rm university-timetable-scheduler_sqlite-data
-docker-compose up -d
-docker-compose exec web pnpm run db:push
-docker-compose exec web pnpm run db:seed
+# Test connection
+psql "your-neon-connection-string" -c "SELECT 1"
+
+# Check environment variable
+echo $DATABASE_URL
 ```
 
 **Problem**: Prisma client is out of sync
@@ -283,9 +456,28 @@ docker-compose exec web pnpm run db:seed
 **Solution**: Regenerate the Prisma client:
 
 ```bash
+pnpm run db:generate
+
+# In Docker:
 docker-compose exec web pnpm run db:generate
 docker-compose restart web
 ```
+
+**Problem**: Migration fails with timestamp errors
+
+**Solution**: The migration scripts handle timestamp conversion automatically. If you encounter issues:
+
+```bash
+# Re-export and regenerate SQL
+pnpm run db:migrate-to-neon
+
+# Check the generated SQL file
+head -20 neon-import.sql
+```
+
+**Problem**: Data import shows fewer records than expected
+
+**Solution**: Some records may be skipped due to unique constraints. Check the verification output at the end of the SQL script execution.
 
 ### Performance Issues
 
@@ -313,26 +505,47 @@ services:
           memory: 2G
 ```
 
-### Development vs Production
+### Sample Data
 
-For production deployment:
+The application includes comprehensive seed data:
+- 21 Departments (Computer Science, Mathematics, Engineering, etc.)
+- 69 Users (Admin, Faculty, Students)
+- 66 Instructors with availability schedules
+- 89 Rooms with different types and capacities
+- 108 Student Groups
+- 300 Courses
+- Pre-configured constraint settings
 
-1. **Generate secure secrets**:
-   ```bash
-   openssl rand -base64 32  # For NEXTAUTH_SECRET
-   openssl rand -base64 32  # For SOLVER_API_KEY
-   ```
+Run `pnpm run db:seed` to populate your database with this sample data.
 
-2. **Update environment variables** in `.env` file with production values
+### Testing
 
-3. **Use PostgreSQL** instead of SQLite for better performance:
-   - Update `DATABASE_URL` in `.env`
-   - Update Prisma schema datasource to `postgresql`
-   - Run migrations: `pnpm run db:migrate`
+```bash
+# Run unit tests
+pnpm run test
 
-4. **Enable HTTPS** using a reverse proxy (nginx, Traefik, or Caddy)
+# Run unit tests in watch mode
+pnpm run test:watch
 
-5. **Set up monitoring** and logging for production workloads
+# Run end-to-end tests
+pnpm run test:e2e
+
+# Run e2e tests with UI
+pnpm run test:e2e:ui
+```
+
+### Key Features Implemented
+
+- **Dashboard Analytics**: Real-time statistics and metrics
+- **Course Management**: CRUD operations with CSV/Excel import
+- **Instructor Management**: Availability scheduling and preferences
+- **Room Management**: Capacity and equipment tracking
+- **Student Groups**: Program and semester organization
+- **Timetable Generation**: AI-powered constraint-based scheduling
+- **Manual Editing**: Drag-and-drop interface for fine-tuning
+- **Conflict Detection**: Real-time validation of scheduling conflicts
+- **Export Options**: PDF and Excel export of timetables
+- **Role-Based Access Control**: Admin, Faculty, and Student views
 
 ## License
 

@@ -64,7 +64,7 @@ export default async function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link href="/login">
+            <Link href="/register">
               <Button
                 size="lg"
                 className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl hover:shadow-blue-500/50 transition-all hover:scale-105"

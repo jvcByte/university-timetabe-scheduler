@@ -6,29 +6,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seed...');
 
-  // Create departments
+  // Create departments (reduced to 5)
   const departments = [
     { code: 'CSC', name: 'Computer Science', description: 'Study of computation, information, and automation' },
-    { code: 'SEN', name: 'Software Engineering', description: 'Study of systematic process of software development lifecycle.' },
     { code: 'MATH', name: 'Mathematics', description: 'Study of numbers, quantity, structure, space, and change' },
     { code: 'PHY', name: 'Physics', description: 'Study of matter, energy, and the fundamental forces of nature' },
-    { code: 'CHEM', name: 'Chemistry', description: 'Study of matter and its properties, composition, and reactions' },
-    { code: 'BIO', name: 'Biology', description: 'Study of living organisms and their vital processes' },
-    { code: 'ENG', name: 'English', description: 'Study of English language, literature, and composition' },
-    { code: 'HIS', name: 'History', description: 'Study of past events and their impact on society' },
-    { code: 'PSY', name: 'Psychology', description: 'Study of mind and behavior' },
-    { code: 'ECO', name: 'Economics', description: 'Study of production, distribution, and consumption of goods and services' },
+    { code: 'ENG', name: 'Engineering', description: 'Study of engineering principles and applications' },
     { code: 'BUS', name: 'Business Administration', description: 'Study of business management and operations' },
-    { code: 'EENG', name: 'Electrical Engineering', description: 'Study of electricity, electronics, and electromagnetism' },
-    { code: 'MENG', name: 'Mechanical Engineering', description: 'Study of mechanics, thermodynamics, and materials science' },
-    { code: 'CENG', name: 'Civil Engineering', description: 'Study of design and construction of infrastructure' },
-    { code: 'ART', name: 'Art', description: 'Study of visual arts, design, and creative expression' },
-    { code: 'MUS', name: 'Music', description: 'Study of musical theory, performance, and composition' },
-    { code: 'PHIL', name: 'Philosophy', description: 'Study of fundamental questions about existence, knowledge, and ethics' },
-    { code: 'SOC', name: 'Sociology', description: 'Study of society, social relationships, and institutions' },
-    { code: 'POL', name: 'Political Science', description: 'Study of government, politics, and political behavior' },
-    { code: 'ANTH', name: 'Anthropology', description: 'Study of human societies, cultures, and their development' },
-    { code: 'GEO', name: 'Geography', description: 'Study of Earth\'s landscapes, environments, and places' },
   ];
 
   const createdDepartments: Record<string, any> = {};
@@ -58,495 +42,217 @@ async function main() {
   });
   console.log('Created admin user:', admin.email);
 
-  // Create sample faculty users and instructors
+  // Create sample faculty users and instructors (reduced to 10)
   const facultyPassword = await bcrypt.hash('faculty123', 10);
+  const instructors = [];
   
-  const faculty1 = await prisma.user.upsert({
-    where: { email: 'john.smith@university.edu' },
-    update: {},
-    create: {
-      email: 'john.smith@university.edu',
-      name: 'Dr. John Smith',
-      password: facultyPassword,
-      role: 'FACULTY',
-    },
-  });
+  const instructorData = [
+    { name: 'Dr. John Smith', email: 'john.smith@university.edu', dept: 'CSC' },
+    { name: 'Dr. Jane Doe', email: 'jane.doe@university.edu', dept: 'CSC' },
+    { name: 'Prof. Robert Johnson', email: 'robert.johnson@university.edu', dept: 'MATH' },
+    { name: 'Dr. Sarah Williams', email: 'sarah.williams@university.edu', dept: 'MATH' },
+    { name: 'Prof. Michael Brown', email: 'michael.brown@university.edu', dept: 'PHY' },
+    { name: 'Dr. Emily Davis', email: 'emily.davis@university.edu', dept: 'PHY' },
+    { name: 'Prof. David Wilson', email: 'david.wilson@university.edu', dept: 'ENG' },
+    { name: 'Dr. Lisa Anderson', email: 'lisa.anderson@university.edu', dept: 'ENG' },
+    { name: 'Prof. James Taylor', email: 'james.taylor@university.edu', dept: 'BUS' },
+    { name: 'Dr. Maria Garcia', email: 'maria.garcia@university.edu', dept: 'BUS' },
+  ];
 
-  const instructor1 = await prisma.instructor.upsert({
-    where: { email: 'john.smith@university.edu' },
-    update: {},
-    create: {
-      userId: faculty1.id,
-      name: 'Dr. John Smith',
-      email: 'john.smith@university.edu',
-      departmentId: createdDepartments['CSC'].id,
-      teachingLoad: 12,
-      availability: {
-        MONDAY: ['09:00-12:00', '14:00-17:00'],
-        TUESDAY: ['09:00-12:00', '14:00-17:00'],
-        WEDNESDAY: ['09:00-12:00', '14:00-17:00'],
-        THURSDAY: ['09:00-12:00', '14:00-17:00'],
-        FRIDAY: ['09:00-12:00'],
+  for (const data of instructorData) {
+    const faculty = await prisma.user.upsert({
+      where: { email: data.email },
+      update: {},
+      create: {
+        email: data.email,
+        name: data.name,
+        password: facultyPassword,
+        role: 'FACULTY',
       },
-      preferences: {
-        preferredDays: ['MONDAY', 'WEDNESDAY', 'FRIDAY'],
-        preferredTimes: ['09:00-12:00'],
+    });
+
+    const instructor = await prisma.instructor.upsert({
+      where: { email: data.email },
+      update: {},
+      create: {
+        userId: faculty.id,
+        name: data.name,
+        email: data.email,
+        departmentId: createdDepartments[data.dept].id,
+        teachingLoad: 12,
+        availability: {
+          MONDAY: ['09:00-12:00', '14:00-17:00'],
+          TUESDAY: ['09:00-12:00', '14:00-17:00'],
+          WEDNESDAY: ['09:00-12:00', '14:00-17:00'],
+          THURSDAY: ['09:00-12:00', '14:00-17:00'],
+          FRIDAY: ['09:00-12:00'],
+        },
       },
-    },
-  });
+    });
+    instructors.push(instructor);
+  }
 
-  const faculty2 = await prisma.user.upsert({
-    where: { email: 'jane.doe@university.edu' },
-    update: {},
-    create: {
-      email: 'jane.doe@university.edu',
-      name: 'Dr. Jane Doe',
-      password: facultyPassword,
-      role: 'FACULTY',
-    },
-  });
+  console.log(`Created ${instructors.length} instructors`);
 
-  const instructor2 = await prisma.instructor.upsert({
-    where: { email: 'jane.doe@university.edu' },
-    update: {},
-    create: {
-      userId: faculty2.id,
-      name: 'Dr. Jane Doe',
-      email: 'jane.doe@university.edu',
-      departmentId: createdDepartments['CSC'].id,
-      teachingLoad: 15,
-      availability: {
-        MONDAY: ['10:00-13:00', '14:00-18:00'],
-        TUESDAY: ['10:00-13:00', '14:00-18:00'],
-        WEDNESDAY: ['10:00-13:00', '14:00-18:00'],
-        THURSDAY: ['10:00-13:00', '14:00-18:00'],
-        FRIDAY: ['10:00-13:00'],
+  // Create sample rooms (reduced to 10)
+  const rooms = [];
+  const roomData = [
+    { name: 'CSC-101', building: 'Computer Science Building', capacity: 50, type: 'LECTURE_HALL' },
+    { name: 'CSC-LAB-1', building: 'Computer Science Building', capacity: 30, type: 'LAB' },
+    { name: 'MATH-201', building: 'Mathematics Building', capacity: 40, type: 'LECTURE_HALL' },
+    { name: 'MATH-202', building: 'Mathematics Building', capacity: 35, type: 'LECTURE_HALL' },
+    { name: 'PHY-101', building: 'Physics Building', capacity: 45, type: 'LECTURE_HALL' },
+    { name: 'PHY-LAB-1', building: 'Physics Building', capacity: 25, type: 'LAB' },
+    { name: 'ENG-301', building: 'Engineering Building', capacity: 40, type: 'LECTURE_HALL' },
+    { name: 'ENG-LAB-1', building: 'Engineering Building', capacity: 30, type: 'LAB' },
+    { name: 'BUS-201', building: 'Business Building', capacity: 50, type: 'LECTURE_HALL' },
+    { name: 'SEM-A', building: 'Main Building', capacity: 25, type: 'SEMINAR' },
+  ];
+
+  for (const data of roomData) {
+    const room = await prisma.room.upsert({
+      where: { name: data.name },
+      update: {},
+      create: {
+        name: data.name,
+        building: data.building,
+        capacity: data.capacity,
+        type: data.type,
+        equipment: ['PROJECTOR', 'WHITEBOARD'],
       },
-    },
-  });
+    });
+    rooms.push(room);
+  }
 
-  const faculty3 = await prisma.user.upsert({
-    where: { email: 'robert.johnson@university.edu' },
-    update: {},
-    create: {
-      email: 'robert.johnson@university.edu',
-      name: 'Prof. Robert Johnson',
-      password: facultyPassword,
-      role: 'FACULTY',
-    },
-  });
+  console.log(`Created ${rooms.length} rooms`);
 
-  const instructor3 = await prisma.instructor.upsert({
-    where: { email: 'robert.johnson@university.edu' },
-    update: {},
-    create: {
-      userId: faculty3.id,
-      name: 'Prof. Robert Johnson',
-      email: 'robert.johnson@university.edu',
-      departmentId: createdDepartments['MATH'].id,
-      teachingLoad: 12,
-      availability: {
-        MONDAY: ['08:00-12:00', '13:00-17:00'],
-        TUESDAY: ['08:00-12:00', '13:00-17:00'],
-        WEDNESDAY: ['08:00-12:00', '13:00-17:00'],
-        THURSDAY: ['08:00-12:00', '13:00-17:00'],
-        FRIDAY: ['08:00-12:00'],
+  // Create sample courses (exactly 20)
+  const courses = [];
+  const courseData = [
+    // Computer Science (5 courses)
+    { code: 'CSC101', title: 'Introduction to Programming', duration: 90, credits: 3, dept: 'CSC', type: 'LECTURE_HALL' },
+    { code: 'CSC102', title: 'Data Structures and Algorithms', duration: 90, credits: 4, dept: 'CSC', type: 'LECTURE_HALL' },
+    { code: 'CSC201', title: 'Database Systems', duration: 90, credits: 3, dept: 'CSC', type: 'LECTURE_HALL' },
+    { code: 'CSC202', title: 'Software Engineering', duration: 90, credits: 3, dept: 'CSC', type: 'LECTURE_HALL' },
+    { code: 'CSC-LAB', title: 'Programming Lab', duration: 120, credits: 2, dept: 'CSC', type: 'LAB' },
+    
+    // Mathematics (4 courses)
+    { code: 'MATH101', title: 'Calculus I', duration: 90, credits: 4, dept: 'MATH', type: 'LECTURE_HALL' },
+    { code: 'MATH102', title: 'Calculus II', duration: 90, credits: 4, dept: 'MATH', type: 'LECTURE_HALL' },
+    { code: 'MATH201', title: 'Linear Algebra', duration: 90, credits: 3, dept: 'MATH', type: 'LECTURE_HALL' },
+    { code: 'MATH301', title: 'Discrete Mathematics', duration: 90, credits: 3, dept: 'MATH', type: 'LECTURE_HALL' },
+    
+    // Physics (4 courses)
+    { code: 'PHY101', title: 'Physics I', duration: 90, credits: 4, dept: 'PHY', type: 'LECTURE_HALL' },
+    { code: 'PHY102', title: 'Physics II', duration: 90, credits: 4, dept: 'PHY', type: 'LECTURE_HALL' },
+    { code: 'PHY201', title: 'Modern Physics', duration: 90, credits: 3, dept: 'PHY', type: 'LECTURE_HALL' },
+    { code: 'PHY-LAB', title: 'Physics Laboratory', duration: 120, credits: 2, dept: 'PHY', type: 'LAB' },
+    
+    // Engineering (4 courses)
+    { code: 'ENG101', title: 'Engineering Fundamentals', duration: 90, credits: 3, dept: 'ENG', type: 'LECTURE_HALL' },
+    { code: 'ENG201', title: 'Circuit Analysis', duration: 90, credits: 4, dept: 'ENG', type: 'LECTURE_HALL' },
+    { code: 'ENG301', title: 'Digital Systems', duration: 90, credits: 3, dept: 'ENG', type: 'LECTURE_HALL' },
+    { code: 'ENG-LAB', title: 'Engineering Lab', duration: 120, credits: 2, dept: 'ENG', type: 'LAB' },
+    
+    // Business (3 courses)
+    { code: 'BUS101', title: 'Introduction to Business', duration: 90, credits: 3, dept: 'BUS', type: 'LECTURE_HALL' },
+    { code: 'BUS201', title: 'Business Management', duration: 90, credits: 3, dept: 'BUS', type: 'LECTURE_HALL' },
+    { code: 'BUS301', title: 'Marketing Principles', duration: 90, credits: 3, dept: 'BUS', type: 'LECTURE_HALL' },
+  ];
+
+  for (const data of courseData) {
+    const course = await prisma.course.upsert({
+      where: { code: data.code },
+      update: {},
+      create: {
+        code: data.code,
+        title: data.title,
+        duration: data.duration,
+        credits: data.credits,
+        departmentId: createdDepartments[data.dept].id,
+        roomType: data.type,
       },
-    },
-  });
+    });
+    courses.push(course);
+  }
 
-  console.log('Created instructors:', instructor1.name, instructor2.name, instructor3.name);
+  console.log(`Created ${courses.length} courses`);
 
-  // Create sample rooms
-  const room1 = await prisma.room.upsert({
-    where: { name: 'CSC-101' },
-    update: {},
-    create: {
-      name: 'CSC-101',
-      building: 'Computer Science Building',
-      capacity: 50,
-      type: 'LECTURE_HALL',
-      equipment: ['PROJECTOR', 'WHITEBOARD', 'AUDIO_SYSTEM'],
-    },
-  });
+  // Create student groups (reduced to 5)
+  const groups = [];
+  const groupData = [
+    { name: 'CSC-2024-A', program: 'Computer Science', year: 1, semester: 1, size: 45 },
+    { name: 'MATH-2024-A', program: 'Mathematics', year: 1, semester: 1, size: 40 },
+    { name: 'PHY-2024-A', program: 'Physics', year: 1, semester: 1, size: 35 },
+    { name: 'ENG-2024-A', program: 'Engineering', year: 1, semester: 1, size: 50 },
+    { name: 'BUS-2024-A', program: 'Business', year: 1, semester: 1, size: 42 },
+  ];
 
-  const room2 = await prisma.room.upsert({
-    where: { name: 'CSC-LAB-1' },
-    update: {},
-    create: {
-      name: 'CSC-LAB-1',
-      building: 'Computer Science Building',
-      capacity: 30,
-      type: 'LAB',
-      equipment: ['COMPUTERS', 'PROJECTOR', 'WHITEBOARD'],
-    },
-  });
+  for (const data of groupData) {
+    const group = await prisma.studentGroup.upsert({
+      where: { name: data.name },
+      update: {},
+      create: data,
+    });
+    groups.push(group);
+  }
 
-  const room3 = await prisma.room.upsert({
-    where: { name: 'MATH-201' },
-    update: {},
-    create: {
-      name: 'MATH-201',
-      building: 'Mathematics Building',
-      capacity: 40,
-      type: 'LECTURE_HALL',
-      equipment: ['PROJECTOR', 'WHITEBOARD'],
-    },
-  });
+  console.log(`Created ${groups.length} student groups`);
 
-  const room4 = await prisma.room.upsert({
-    where: { name: 'SEM-A' },
-    update: {},
-    create: {
-      name: 'SEM-A',
-      building: 'Main Building',
-      capacity: 25,
-      type: 'SEMINAR',
-      equipment: ['WHITEBOARD', 'TV_SCREEN'],
-    },
-  });
-
-  const room5 = await prisma.room.upsert({
-    where: { name: 'AUDITORIUM' },
-    update: {},
-    create: {
-      name: 'AUDITORIUM',
-      building: 'Main Building',
-      capacity: 200,
-      type: 'AUDITORIUM',
-      equipment: ['PROJECTOR', 'AUDIO_SYSTEM', 'STAGE', 'MICROPHONES'],
-    },
-  });
-
-  console.log('Created rooms:', room1.name, room2.name, room3.name, room4.name, room5.name);
-
-  // Create sample courses
-  const course1 = await prisma.course.upsert({
-    where: { code: 'CSC101' },
-    update: {},
-    create: {
-      code: 'CSC101',
-      title: 'Introduction to Programming',
-      duration: 90,
-      credits: 3,
-      departmentId: createdDepartments['CSC'].id,
-      roomType: 'LECTURE_HALL',
-    },
-  });
-
-  const course2 = await prisma.course.upsert({
-    where: { code: 'CSC102' },
-    update: {},
-    create: {
-      code: 'CSC102',
-      title: 'Data Structures and Algorithms',
-      duration: 90,
-      credits: 4,
-      departmentId: createdDepartments['CSC'].id,
-      roomType: 'LECTURE_HALL',
-    },
-  });
-
-  const course3 = await prisma.course.upsert({
-    where: { code: 'CSC201' },
-    update: {},
-    create: {
-      code: 'CSC201',
-      title: 'Database Systems',
-      duration: 90,
-      credits: 3,
-      departmentId: createdDepartments['CSC'].id,
-      roomType: 'LECTURE_HALL',
-    },
-  });
-
-  const course4 = await prisma.course.upsert({
-    where: { code: 'CS202' },
-    update: {},
-    create: {
-      code: 'CS202',
-      title: 'Software Engineering Lab',
-      duration: 120,
-      credits: 2,
-      departmentId: createdDepartments['CSC'].id,
-      roomType: 'LAB',
-    },
-  });
-
-  const course5 = await prisma.course.upsert({
-    where: { code: 'MATH101' },
-    update: {},
-    create: {
-      code: 'MATH101',
-      title: 'Calculus I',
-      duration: 90,
-      credits: 4,
-      departmentId: createdDepartments['MATH'].id,
-      roomType: 'LECTURE_HALL',
-    },
-  });
-
-  const course6 = await prisma.course.upsert({
-    where: { code: 'MATH201' },
-    update: {},
-    create: {
-      code: 'MATH201',
-      title: 'Linear Algebra',
-      duration: 90,
-      credits: 3,
-      departmentId: createdDepartments['MATH'].id,
-      roomType: 'LECTURE_HALL',
-    },
-  });
-
-  console.log('Created courses:', course1.code, course2.code, course3.code, course4.code, course5.code, course6.code);
-
-  // Create student groups
-  const group1 = await prisma.studentGroup.upsert({
-    where: { name: 'CSC-2024-A' },
-    update: {},
-    create: {
-      name: 'CSC-2024-A',
-      program: 'Computer Science',
-      year: 1,
-      semester: 1,
-      size: 45,
-    },
-  });
-
-  const group2 = await prisma.studentGroup.upsert({
-    where: { name: 'CSC-2024-B' },
-    update: {},
-    create: {
-      name: 'CSC-2024-B',
-      program: 'Computer Science',
-      year: 1,
-      semester: 1,
-      size: 42,
-    },
-  });
-
-  const group3 = await prisma.studentGroup.upsert({
-    where: { name: 'CSC-2023-A' },
-    update: {},
-    create: {
-      name: 'CSC-2023-A',
-      program: 'Computer Science',
-      year: 2,
-      semester: 3,
-      size: 38,
-    },
-  });
-
-  console.log('Created student groups:', group1.name, group2.name, group3.name);
-
-  // Link courses to instructors
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course1.id,
-        instructorId: instructor1.id,
+  // Link courses to instructors (2 instructors per department, each teaching 2-3 courses)
+  let linkCount = 0;
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+    // Assign instructors from the same department (2 per dept, so i/2.5 gives us the right instructor)
+    const instructorIndex = Math.floor(i / 2) % instructors.length;
+    const instructor = instructors[instructorIndex];
+    
+    await prisma.courseInstructor.upsert({
+      where: {
+        courseId_instructorId: {
+          courseId: course.id,
+          instructorId: instructor.id,
+        },
       },
-    },
-    update: {},
-    create: {
-      courseId: course1.id,
-      instructorId: instructor1.id,
-      isPrimary: true,
-    },
-  });
-
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course2.id,
-        instructorId: instructor1.id,
+      update: {},
+      create: {
+        courseId: course.id,
+        instructorId: instructor.id,
+        isPrimary: true,
       },
-    },
-    update: {},
-    create: {
-      courseId: course2.id,
-      instructorId: instructor1.id,
-      isPrimary: true,
-    },
-  });
+    });
+    linkCount++;
+  }
+  console.log(`Linked ${linkCount} course-instructor relationships`);
 
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course3.id,
-        instructorId: instructor2.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course3.id,
-      instructorId: instructor2.id,
-      isPrimary: true,
-    },
-  });
-
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course4.id,
-        instructorId: instructor2.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course4.id,
-      instructorId: instructor2.id,
-      isPrimary: true,
-    },
-  });
-
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course5.id,
-        instructorId: instructor3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course5.id,
-      instructorId: instructor3.id,
-      isPrimary: true,
-    },
-  });
-
-  await prisma.courseInstructor.upsert({
-    where: {
-      courseId_instructorId: {
-        courseId: course6.id,
-        instructorId: instructor3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course6.id,
-      instructorId: instructor3.id,
-      isPrimary: true,
-    },
-  });
-
-  console.log('Linked courses to instructors');
-
-  // Link courses to student groups
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course1.id,
-        groupId: group1.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course1.id,
-      groupId: group1.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course1.id,
-        groupId: group2.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course1.id,
-      groupId: group2.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course5.id,
-        groupId: group1.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course5.id,
-      groupId: group1.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course5.id,
-        groupId: group2.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course5.id,
-      groupId: group2.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course2.id,
-        groupId: group3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course2.id,
-      groupId: group3.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course3.id,
-        groupId: group3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course3.id,
-      groupId: group3.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course4.id,
-        groupId: group3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course4.id,
-      groupId: group3.id,
-    },
-  });
-
-  await prisma.courseGroup.upsert({
-    where: {
-      courseId_groupId: {
-        courseId: course6.id,
-        groupId: group3.id,
-      },
-    },
-    update: {},
-    create: {
-      courseId: course6.id,
-      groupId: group3.id,
-    },
-  });
-
-  console.log('Linked courses to student groups');
+  // Link courses to student groups (each group takes 4 courses from their department)
+  linkCount = 0;
+  for (let i = 0; i < groups.length; i++) {
+    const group = groups[i];
+    // Each group takes courses from their department
+    const startIdx = i * 4; // 4 courses per department (approximately)
+    const endIdx = Math.min(startIdx + 4, courses.length);
+    
+    for (let j = startIdx; j < endIdx; j++) {
+      if (j < courses.length) {
+        await prisma.courseGroup.upsert({
+          where: {
+            courseId_groupId: {
+              courseId: courses[j].id,
+              groupId: group.id,
+            },
+          },
+          update: {},
+          create: {
+            courseId: courses[j].id,
+            groupId: group.id,
+          },
+        });
+        linkCount++;
+      }
+    }
+  }
+  console.log(`Linked ${linkCount} course-group relationships`);
 
   // Create default constraint configuration
   const constraintConfig = await prisma.constraintConfig.upsert({

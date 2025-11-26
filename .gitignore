@@ -54,3 +54,7 @@ ENV/
 
 # docker
 docker-compose.override.yml
+
+# data export and import
+data-export/
+neon-import.sql
