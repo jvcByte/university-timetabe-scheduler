@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/actions/auth";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface DashboardHeaderProps {
   userName: string;
@@ -20,8 +20,6 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ userName, userRole, userEmail }: DashboardHeaderProps) {
-  const router = useRouter();
-
   const handleLogout = async () => {
     await logout();
   };
@@ -52,7 +50,15 @@ export function DashboardHeader({ userName, userRole, userEmail }: DashboardHead
             </p>
           </div>
 
-          <DropdownMenu>
+          <div className="flex items-center gap-3">
+            <Link href="/docs">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Documentation</span>
+              </Button>
+            </Link>
+
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -76,6 +82,7 @@ export function DashboardHeader({ userName, userRole, userEmail }: DashboardHead
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </div>
     </header>

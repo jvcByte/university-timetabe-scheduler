@@ -5,7 +5,9 @@ Automated lecture timetable scheduling system using Next.js 16 and Python FastAP
 ## Features
 
 - **Academic Data Management**: Manage courses, instructors, rooms, and student groups
-- **Automated Scheduling**: Generate optimized timetables using constraint programming
+- **Automated Scheduling**: Generate optimized timetables using two solver options:
+  - **Local Solver** (Default): Fast Simulated Annealing algorithm (10-60 seconds)
+  - **OR-Tools Solver** (Optional): Constraint Programming for proven optimal solutions
 - **Manual Editing**: Fine-tune generated schedules with drag-and-drop interface
 - **Role-Based Access**: Admin, Faculty, and Student roles with appropriate permissions
 - **Import/Export**: CSV and Excel support for bulk data operations
@@ -57,10 +59,18 @@ Visit http://localhost:3000 and login with:
 
 ## Documentation
 
+### User Documentation
+- **[User Guide](docs/USER_GUIDE.md)** - Complete guide for administrators, faculty, and students
 - **[Neon Import Guide](NEON_IMPORT_INSTRUCTIONS.md)** - Migrate SQLite data to PostgreSQL
 - **[Import Summary](IMPORT_SUMMARY.md)** - Quick reference for data migration
-- **[Deployment Guide](DEPLOYMENT.md)** - Docker deployment instructions (if available)
 - **[Ready to Import](READY_TO_IMPORT.md)** - Final checklist before importing
+
+### Technical Documentation
+- **[Architecture](docs/ARCHITECTURE.md)** - System architecture and design patterns
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - REST API reference for solver service
+- **[Solver Algorithm](docs/SOLVER_ALGORITHM.md)** - Constraint programming algorithm details
+- **[E2E Tests](e2e/README.md)** - End-to-end testing documentation
+- **[Solver Tests](solver/tests/README.md)** - Solver service testing documentation
 
 ## Getting Started
 

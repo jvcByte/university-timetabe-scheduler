@@ -6,6 +6,7 @@ import {
   Calendar,
   ArrowRight,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 
 export default async function Home() {
@@ -40,11 +41,19 @@ export default async function Home() {
               <p className="text-xs text-gray-600 font-medium">Smart Academic Planning</p>
             </div>
           </div>
-          <Link href="/login">
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              Sign In
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/docs">
+              <Button variant="ghost" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Documentation
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -73,13 +82,16 @@ export default async function Home() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="px-8 border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 shadow-md transition-all hover:scale-105"
-            >
-              Watch Demo
-            </Button>
+            <Link href="/docs">
+              <Button
+                size="lg"
+                variant="outline"
+                className="px-8 border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 shadow-md transition-all hover:scale-105"
+              >
+                <BookOpen className="mr-2 h-5 w-5" />
+                View Documentation
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}
