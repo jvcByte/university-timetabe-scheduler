@@ -259,7 +259,7 @@ export default function DocumentationPage() {
           <div>
             <h3 className="font-medium mb-2">Need Help?</h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Can't find what you're looking for? We're here to help.
+              Can&apos;t find what you&apos;re looking for? We&apos;re here to help.
             </p>
             <ul className="space-y-2 text-sm">
               <li>

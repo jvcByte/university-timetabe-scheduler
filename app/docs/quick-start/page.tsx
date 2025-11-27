@@ -74,9 +74,9 @@ export default function QuickStartPage() {
               <h4 className="font-semibold mb-2">Option A: Import Data (Recommended)</h4>
               <ol className="list-decimal list-inside space-y-2 ml-4">
                 <li>Navigate to Admin → Courses (or Instructors, Rooms, Groups)</li>
-                <li>Click "Import" button</li>
+                <li>Click &quot;Import&quot; button</li>
                 <li>Upload your CSV or Excel file</li>
-                <li>Review preview and click "Import Data"</li>
+                <li>Review preview and click &quot;Import Data&quot;</li>
               </ol>
             </div>
             <div>
