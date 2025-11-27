@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   const isLoggedIn = !!sessionToken;
 
   // Public routes
-  if (pathname === "/") {
+  if (pathname === "/" || pathname.startsWith("/docs")) {
     return NextResponse.next();
   }
 
