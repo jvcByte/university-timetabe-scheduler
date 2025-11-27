@@ -83,9 +83,9 @@ export default function QuickStartPage() {
               <h4 className="font-semibold mb-2">Option B: Manual Entry</h4>
               <ol className="list-decimal list-inside space-y-2 ml-4">
                 <li>Navigate to the entity page (Courses, Instructors, etc.)</li>
-                <li>Click "New" button</li>
+                <li>Click &quot;New&quot; button</li>
                 <li>Fill in the form</li>
-                <li>Click "Create"</li>
+                <li>Click &quot;Create&quot;</li>
               </ol>
             </div>
             <Link href="/docs/user-guide#importing-data">
@@ -113,7 +113,7 @@ export default function QuickStartPage() {
             <ol className="list-decimal list-inside space-y-2">
               <li>Navigate to Admin → Instructors</li>
               <li>Click Edit on an instructor</li>
-              <li>Go to "Availability" tab</li>
+              <li>Go to &quot;Availability&quot; tab</li>
               <li>For each day, add time ranges (e.g., 09:00-12:00, 14:00-17:00)</li>
               <li>Optionally set preferences (preferred days/times)</li>
               <li>Save changes</li>
@@ -141,8 +141,8 @@ export default function QuickStartPage() {
             <ol className="list-decimal list-inside space-y-2">
               <li>Navigate to Admin → Courses</li>
               <li>Click Edit on a course</li>
-              <li>In "Instructors" section, select one or more instructors</li>
-              <li>In "Student Groups" section, select groups</li>
+              <li>In &quot;Instructors&quot; section, select one or more instructors</li>
+              <li>In &quot;Student Groups&quot; section, select groups</li>
               <li>Save changes</li>
             </ol>
           </CardContent>
@@ -164,16 +164,16 @@ export default function QuickStartPage() {
           <CardContent className="space-y-3">
             <ol className="list-decimal list-inside space-y-2">
               <li>Navigate to Admin → Timetables</li>
-              <li>Click "Generate New Timetable"</li>
+              <li>Click &quot;Generate New Timetable&quot;</li>
               <li>Fill in:
                 <ul className="list-disc list-inside ml-6 mt-2">
-                  <li>Name (e.g., "Fall 2024 Schedule")</li>
-                  <li>Semester (e.g., "Fall 2024")</li>
-                  <li>Academic Year (e.g., "2024-2025")</li>
+                  <li>Name (e.g., &quot;Fall 2024 Schedule&quot;)</li>
+                  <li>Semester (e.g., &quot;Fall 2024&quot;)</li>
+                  <li>Academic Year (e.g., &quot;2024-2025&quot;)</li>
                 </ul>
               </li>
-              <li>Keep "Use Fast Local Solver" enabled (recommended)</li>
-              <li>Click "Generate"</li>
+              <li>Keep &quot;Use Fast Local Solver&quot; enabled (recommended)</li>
+              <li>Click &quot;Generate&quot;</li>
               <li>Wait 10-60 seconds for results</li>
             </ol>
             <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -208,7 +208,7 @@ export default function QuickStartPage() {
               <li>Review the generated timetable in calendar view</li>
               <li>Use filters to check specific rooms, instructors, or groups</li>
               <li>If needed, enter Edit Mode to manually adjust assignments</li>
-              <li>Once satisfied, click "Publish"</li>
+              <li>Once satisfied, click &quot;Publish&quot;</li>
               <li>Timetable is now visible to faculty and students</li>
             </ol>
           </CardContent>
