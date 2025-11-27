@@ -235,7 +235,7 @@ export function StudentForm({
         <Input
           id="studentId"
           {...register("studentId")}
-          placeholder="S2024001"
+          placeholder="S2025001"
           disabled={isSubmitting}
         />
         {errors.studentId && (

@@ -24,7 +24,7 @@ function createPrismaClient() {
       console.log("✅ Using Turso database");
       return new PrismaClient({ adapter });
     } catch (error) {
-      console.error("❌ Turso adapter not installed. Run: npm install @libsql/client @prisma/adapter-libsql");
+      console.error("❌ Turso adapter not installed. Run: pnpm add @libsql/client @prisma/adapter-libsql");
       throw error;
     }
   }

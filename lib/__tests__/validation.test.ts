@@ -208,7 +208,7 @@ describe('roomSchema', () => {
 describe('studentGroupSchema', () => {
   it('should validate a valid student group', () => {
     const validGroup = {
-      name: 'CS-2024-A',
+      name: 'CS-2025-A',
       program: 'Computer Science',
       year: 2,
       semester: 1,
@@ -222,7 +222,7 @@ describe('studentGroupSchema', () => {
 
   it('should reject group with invalid year', () => {
     const invalidGroup = {
-      name: 'CS-2024-A',
+      name: 'CS-2025-A',
       program: 'Computer Science',
       year: 0,
       semester: 1,
@@ -235,7 +235,7 @@ describe('studentGroupSchema', () => {
 
   it('should reject group with invalid semester', () => {
     const invalidGroup = {
-      name: 'CS-2024-A',
+      name: 'CS-2025-A',
       program: 'Computer Science',
       year: 2,
       semester: 3,
@@ -372,9 +372,9 @@ describe('registerSchema', () => {
 describe('generateTimetableSchema', () => {
   it('should validate valid timetable generation input', () => {
     const validInput = {
-      name: 'Fall 2024 Timetable',
-      semester: 'Fall 2024',
-      academicYear: '2024-2025',
+      name: 'Fall 2025 Timetable',
+      semester: 'Fall 2025',
+      academicYear: '2025-2025',
       constraintConfigId: 1,
       timeLimitSeconds: 300,
     };
@@ -385,9 +385,9 @@ describe('generateTimetableSchema', () => {
 
   it('should accept academic year in YYYY format', () => {
     const input = {
-      name: 'Fall 2024 Timetable',
-      semester: 'Fall 2024',
-      academicYear: '2024',
+      name: 'Fall 2025 Timetable',
+      semester: 'Fall 2025',
+      academicYear: '2025',
     };
 
     const result = generateTimetableSchema.safeParse(input);
@@ -396,8 +396,8 @@ describe('generateTimetableSchema', () => {
 
   it('should reject invalid academic year format', () => {
     const invalidInput = {
-      name: 'Fall 2024 Timetable',
-      semester: 'Fall 2024',
+      name: 'Fall 2025 Timetable',
+      semester: 'Fall 2025',
       academicYear: '24-25',
     };
 
@@ -407,9 +407,9 @@ describe('generateTimetableSchema', () => {
 
   it('should use default time limit', () => {
     const input = {
-      name: 'Fall 2024 Timetable',
-      semester: 'Fall 2024',
-      academicYear: '2024',
+      name: 'Fall 2025 Timetable',
+      semester: 'Fall 2025',
+      academicYear: '2025',
     };
 
     const result = generateTimetableSchema.safeParse(input);

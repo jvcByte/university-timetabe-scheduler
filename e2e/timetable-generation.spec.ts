@@ -28,8 +28,8 @@ test.describe('Timetable Generation Flow', () => {
 
     // Fill generation form
     await page.fill('#name', 'E2E Test Timetable');
-    await page.fill('#semester', 'Fall 2024');
-    await page.fill('#academicYear', '2024-2025');
+    await page.fill('#semester', 'Fall 2025');
+    await page.fill('#academicYear', '2025-2025');
 
     // Select constraint configuration (default should be available)
     await page.click('[data-testid="constraint-config-select"]');
@@ -49,7 +49,7 @@ test.describe('Timetable Generation Flow', () => {
     
     // Verify timetable details
     await expect(page.locator('text=E2E Test Timetable')).toBeVisible();
-    await expect(page.locator('text=Fall 2024')).toBeVisible();
+    await expect(page.locator('text=Fall 2025')).toBeVisible();
   });
 
   test('generation shows error for insufficient data', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('Timetable Generation Flow', () => {
     // Fill form with minimal data
     await page.fill('#name', 'Test Empty Timetable');
     await page.fill('#semester', 'Test Semester');
-    await page.fill('#academicYear', '2024');
+    await page.fill('#academicYear', '2025');
 
     // Try to generate (this might fail due to insufficient data)
     await page.click('button[type="submit"]');

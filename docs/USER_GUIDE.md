@@ -187,7 +187,7 @@ Friday:    09:00-12:00
 1. Navigate to **Admin → Groups**
 2. Click **"New Group"**
 3. Fill in details:
-   - **Name:** Group identifier (e.g., "CS-2024-A")
+   - **Name:** Group identifier (e.g., "CS-2025-A")
    - **Program:** Degree program
    - **Year:** Academic year
    - **Semester:** Current semester
@@ -236,8 +236,8 @@ Lab 201,Science Building,30,LAB,"COMPUTERS,PROJECTOR"
 **Student Groups CSV:**
 ```csv
 name,program,year,semester,size
-CS-2024-A,Computer Science,2024,1,30
-MATH-2024-B,Mathematics,2024,1,25
+CS-2025-A,Computer Science,2025,1,30
+MATH-2025-B,Mathematics,2025,1,25
 ```
 
 #### Excel Import
@@ -300,9 +300,9 @@ All classes will be scheduled within this window.
 1. Navigate to **Admin → Timetables**
 2. Click **"Generate New Timetable"**
 3. Fill in details:
-   - **Name:** Descriptive name (e.g., "Fall 2024 Schedule")
-   - **Semester:** e.g., "Fall 2024"
-   - **Academic Year:** e.g., "2024-2025"
+   - **Name:** Descriptive name (e.g., "Fall 2025 Schedule")
+   - **Semester:** e.g., "Fall 2025"
+   - **Academic Year:** e.g., "2025-2025"
 4. Click **"Generate"**
 
 #### Generation Process
@@ -819,5 +819,5 @@ The student dashboard shows:
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** November 26, 2024  
+**Last Updated:** November 26, 2025  
 **For Support:** support@university.edu

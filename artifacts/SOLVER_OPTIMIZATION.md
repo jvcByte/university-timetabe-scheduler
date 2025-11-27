@@ -90,9 +90,9 @@ Implemented a high-performance TypeScript-based solver using proven optimization
 import { generateTimetableLocal } from '@/actions/local-timetables';
 
 const result = await generateTimetableLocal({
-  name: 'Fall 2024 Timetable',
+  name: 'Fall 2025 Timetable',
   semester: 'FALL',
-  academicYear: '2024',
+  academicYear: '2025',
   timeLimitSeconds: 300,
 });
 ```

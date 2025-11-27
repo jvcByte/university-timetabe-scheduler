@@ -135,7 +135,7 @@ Content-Type: application/json
   "groups": [
     {
       "id": 1,
-      "name": "CS-2024-A",
+      "name": "CS-2025-A",
       "size": 30,
       "course_ids": [1]
     }
@@ -567,10 +567,10 @@ Always use HTTPS in production to protect API keys and data in transit.
 The Solver Service logs all requests and responses:
 
 ```
-2024-11-26 10:30:15 - INFO - Request: POST /api/v1/generate
-2024-11-26 10:30:15 - INFO - Received generation request: 150 courses, 50 instructors, 30 rooms, 20 groups
-2024-11-26 10:31:00 - INFO - Optimization completed: success=True, assignments=150, fitness=15.3, time=45.2s
-2024-11-26 10:31:00 - INFO - Response: POST /api/v1/generate Status: 200 Duration: 45.234s
+2025-11-26 10:30:15 - INFO - Request: POST /api/v1/generate
+2025-11-26 10:30:15 - INFO - Received generation request: 150 courses, 50 instructors, 30 rooms, 20 groups
+2025-11-26 10:31:00 - INFO - Optimization completed: success=True, assignments=150, fitness=15.3, time=45.2s
+2025-11-26 10:31:00 - INFO - Response: POST /api/v1/generate Status: 200 Duration: 45.234s
 ```
 
 Configure log level via environment variable:

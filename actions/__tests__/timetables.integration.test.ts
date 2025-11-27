@@ -121,9 +121,9 @@ describe("Timetable Server Actions Integration Tests", () => {
       );
 
       const input = {
-        name: "Fall 2024 Timetable",
+        name: "Fall 2025 Timetable",
         semester: "Fall",
-        academicYear: "2024",
+        academicYear: "2025",
         timeLimitSeconds: 300,
       };
 
@@ -167,9 +167,9 @@ describe("Timetable Server Actions Integration Tests", () => {
       );
 
       const input = {
-        name: "Fall 2024 Timetable",
+        name: "Fall 2025 Timetable",
         semester: "Fall",
-        academicYear: "2024",
+        academicYear: "2025",
       };
 
       const result = await generateTimetable(input);
@@ -192,9 +192,9 @@ describe("Timetable Server Actions Integration Tests", () => {
       );
 
       const input = {
-        name: "Fall 2024 Timetable",
+        name: "Fall 2025 Timetable",
         semester: "Fall",
-        academicYear: "2024",
+        academicYear: "2025",
       };
 
       const result = await generateTimetable(input);
@@ -339,7 +339,7 @@ describe("Timetable Server Actions Integration Tests", () => {
       const instructor2 = await createTestInstructor(prisma, departmentId, {
         email: "instructor2@test.com",
       });
-      const group2 = await createTestStudentGroup(prisma, { name: "CS-2024-B" });
+      const group2 = await createTestStudentGroup(prisma, { name: "CS-2025-B" });
 
       const assignment2 = await createTestAssignment(
         prisma,
@@ -380,7 +380,7 @@ describe("Timetable Server Actions Integration Tests", () => {
       // Create second course and assignment with same instructor
       const course2 = await createTestCourse(prisma, departmentId, { code: "CS102" });
       const room2 = await createTestRoom(prisma, { name: "Room 102" });
-      const group2 = await createTestStudentGroup(prisma, { name: "CS-2024-B" });
+      const group2 = await createTestStudentGroup(prisma, { name: "CS-2025-B" });
 
       const assignment2 = await createTestAssignment(
         prisma,

@@ -47,9 +47,9 @@ C301,Building C,100,AUDITORIUM,"SOUND SYSTEM, PROJECTOR"`,
   studentGroups: {
     label: "Student Groups",
     template: `name,program,year,semester,size
-CS-2024-1,Computer Science,1,1,45
+CS-2025-1,Computer Science,1,1,45
 MATH-2023-3,Mathematics,2,3,38
-PHY-2024-1,Physics,1,1,42`,
+PHY-2025-1,Physics,1,1,42`,
   },
 };
 

@@ -186,7 +186,7 @@ describe("Instructor Server Actions Integration Tests", () => {
 
       const group = await prisma.studentGroup.create({
         data: {
-          name: "CS-2024-A",
+          name: "CS-2025-A",
           program: "CS",
           year: 1,
           semester: 1,
@@ -198,7 +198,7 @@ describe("Instructor Server Actions Integration Tests", () => {
         data: {
           name: "Test Timetable",
           semester: "Fall",
-          academicYear: "2024",
+          academicYear: "2025",
           status: "DRAFT",
         },
       });

@@ -345,7 +345,7 @@ For each form, verify:
 - Empty name → "Name must be at least 2 characters"
 
 **Timetable Generation Form**:
-- Invalid year "2024-25" → "Academic year must be in format YYYY or YYYY-YYYY"
+- Invalid year "2025-25" → "Academic year must be in format YYYY or YYYY-YYYY"
 - Time limit 5 → "Time limit must be at least 10 seconds"
 - Empty name → "Timetable name must be at least 3 characters"
 

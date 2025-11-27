@@ -278,7 +278,7 @@ export default function DocumentationPage() {
 
       {/* Version Info */}
       <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>Documentation Version 1.0.0 • Last Updated: November 26, 2024</p>
+        <p>Documentation Version 1.0.0 • Last Updated: November 26, 2025</p>
       </div>
     </div>
   );

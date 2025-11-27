@@ -36,8 +36,8 @@ test.describe('Comprehensive User Flows', () => {
     // Step 4: Generate a timetable
     await page.goto('/admin/timetables/generate');
     await page.fill('#name', 'E2E Complete Flow Timetable');
-    await page.fill('#semester', 'Test Semester 2024');
-    await page.fill('#academicYear', '2024-2025');
+    await page.fill('#semester', 'Test Semester 2025');
+    await page.fill('#academicYear', '2025-2025');
 
     // Select constraint config
     const constraintSelect = page.locator('select[name="constraintConfigId"], [data-testid="constraint-config-select"]').first();

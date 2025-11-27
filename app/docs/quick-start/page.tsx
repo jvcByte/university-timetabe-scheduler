@@ -167,9 +167,9 @@ export default function QuickStartPage() {
               <li>Click &quot;Generate New Timetable&quot;</li>
               <li>Fill in:
                 <ul className="list-disc list-inside ml-6 mt-2">
-                  <li>Name (e.g., &quot;Fall 2024 Schedule&quot;)</li>
-                  <li>Semester (e.g., &quot;Fall 2024&quot;)</li>
-                  <li>Academic Year (e.g., &quot;2024-2025&quot;)</li>
+                  <li>Name (e.g., &quot;Fall 2025 Schedule&quot;)</li>
+                  <li>Semester (e.g., &quot;Fall 2025&quot;)</li>
+                  <li>Academic Year (e.g., &quot;2025-2025&quot;)</li>
                 </ul>
               </li>
               <li>Keep &quot;Use Fast Local Solver&quot; enabled (recommended)</li>

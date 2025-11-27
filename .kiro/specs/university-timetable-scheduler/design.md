@@ -503,7 +503,7 @@ model CourseGroup {
 model Timetable {
   id          Int      @id @default(autoincrement())
   name        String
-  semester    String   // e.g., 'Fall 2024', 'Spring 2025'
+  semester    String   // e.g., 'Fall 2025', 'Spring 2025'
   academicYear String
   status      TimetableStatus @default(DRAFT)
   fitnessScore Float?

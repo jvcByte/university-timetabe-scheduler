@@ -11,7 +11,7 @@
 A modern web application that uses Simulated Annealing optimization (with optional CP-SAT solver) to automatically generate optimized university lecture schedules in under 60 seconds.
 
 **Team:** [Your Team Name]  
-**Date:** November 2024
+**Date:** November 2025
 
 ---
 

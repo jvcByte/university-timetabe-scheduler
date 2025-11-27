@@ -191,7 +191,7 @@ export function StudentGroupForm({
         <Input
           id="name"
           {...register("name")}
-          placeholder="CS-2024-A"
+          placeholder="CS-2025-A"
           disabled={isSubmitting}
         />
         {errors.name && (

@@ -81,7 +81,7 @@ export async function createTestRoom(prisma: PrismaClient, data?: Partial<any>) 
 export async function createTestStudentGroup(prisma: PrismaClient, data?: Partial<any>) {
   return prisma.studentGroup.create({
     data: {
-      name: data?.name || "CS-2024-A",
+      name: data?.name || "CS-2025-A",
       program: data?.program || "Computer Science",
       year: data?.year || 1,
       semester: data?.semester || 1,
@@ -133,9 +133,9 @@ export async function createTestConstraintConfig(prisma: PrismaClient, data?: Pa
 export async function createTestTimetable(prisma: PrismaClient, data?: Partial<any>) {
   return prisma.timetable.create({
     data: {
-      name: data?.name || "Fall 2024 Timetable",
+      name: data?.name || "Fall 2025 Timetable",
       semester: data?.semester || "Fall",
-      academicYear: data?.academicYear || "2024",
+      academicYear: data?.academicYear || "2025",
       status: data?.status || "DRAFT",
       fitnessScore: data?.fitnessScore || null,
       violations: data?.violations || null,

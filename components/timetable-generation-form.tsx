@@ -126,7 +126,7 @@ export function TimetableGenerationForm({
           <Input
             id="name"
             {...register("name")}
-            placeholder="e.g., Fall 2024 Schedule"
+            placeholder="e.g., Fall 2025 Schedule"
             disabled={isGenerating}
           />
           {errors.name && (
@@ -140,7 +140,7 @@ export function TimetableGenerationForm({
             <Input
               id="semester"
               {...register("semester")}
-              placeholder="e.g., Fall 2024"
+              placeholder="e.g., Fall 2025"
               disabled={isGenerating}
             />
             {errors.semester && (
@@ -153,7 +153,7 @@ export function TimetableGenerationForm({
             <Input
               id="academicYear"
               {...register("academicYear")}
-              placeholder="e.g., 2024-2025"
+              placeholder="e.g., 2025-2025"
               disabled={isGenerating}
             />
             {errors.academicYear && (

@@ -113,7 +113,7 @@ await prisma.student.create({
 ### 4. Form Submission
 ```typescript
 {
-  studentId: "S2024001",
+  studentId: "S2025001",
   name: "John Doe",           // Auto-filled from User table
   email: "john@uni.edu",
   year: 2,

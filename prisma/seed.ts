@@ -181,11 +181,11 @@ async function main() {
   // Create student groups (reduced to 5)
   const groups = [];
   const groupData = [
-    { name: 'CSC-2024-A', program: 'Computer Science', year: 1, semester: 1, size: 45 },
-    { name: 'MATH-2024-A', program: 'Mathematics', year: 1, semester: 1, size: 40 },
-    { name: 'PHY-2024-A', program: 'Physics', year: 1, semester: 1, size: 35 },
-    { name: 'ENG-2024-A', program: 'Engineering', year: 1, semester: 1, size: 50 },
-    { name: 'BUS-2024-A', program: 'Business', year: 1, semester: 1, size: 42 },
+    { name: 'CSC-2025-A', program: 'Computer Science', year: 1, semester: 1, size: 45 },
+    { name: 'MATH-2025-A', program: 'Mathematics', year: 1, semester: 1, size: 40 },
+    { name: 'PHY-2025-A', program: 'Physics', year: 1, semester: 1, size: 35 },
+    { name: 'ENG-2025-A', program: 'Engineering', year: 1, semester: 1, size: 50 },
+    { name: 'BUS-2025-A', program: 'Business', year: 1, semester: 1, size: 42 },
   ];
 
   for (const data of groupData) {

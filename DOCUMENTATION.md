@@ -149,5 +149,5 @@ Found an error or want to improve the documentation?
 ---
 
 **Documentation Version:** 1.0.0  
-**Last Updated:** November 26, 2024  
+**Last Updated:** November 26, 2025  
 **Project:** University Timetable Scheduler
